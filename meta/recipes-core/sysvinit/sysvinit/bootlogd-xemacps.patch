@@ -1,0 +1,20 @@
+diff -uwr sysvinit-2.88dsf.orig/src/bootlogd.c sysvinit-2.88dsf/src/bootlogd.c
+--- sysvinit-2.88dsf.orig/src/bootlogd.c	2010-03-23 09:37:01.000000000 -0500
++++ sysvinit-2.88dsf/src/bootlogd.c	2013-01-23 13:32:31.450448968 -0600
+@@ -85,6 +85,7 @@
+ 	{ "ttyB",	"/dev/ttyB%s",		NULL		},
+ 	{ "ttySC",	"/dev/ttySC%s",		"/dev/ttsc/%s"	},
+ 	{ "ttyS",	"/dev/ttyS%s",		"/dev/tts/%s"	},
++	{ "ttyPS",	"/dev/ttyPS%s",		NULL		},
+ 	{ "tty",	"/dev/tty%s",		"/dev/vc/%s"	},
+ 	{ "hvc",	"/dev/hvc%s",		"/dev/hvc/%s"	},
+ 	{ NULL,		NULL,			NULL		},
+@@ -94,7 +95,7 @@
+  *	Devices to try as console if not found on kernel command line.
+  *	Tried from left to right (as opposed to kernel cmdline).
+  */
+-char *defcons[] = { "tty0", "hvc0", "ttyS0", "ttySC0", "ttyB0", NULL };
++char *defcons[] = { "tty0", "hvc0", "ttyS0", "ttyPS0", "ttySC0", "ttyB0", NULL };
+ 
+ /*
+  *	Catch signals.
