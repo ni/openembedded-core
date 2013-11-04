@@ -39,6 +39,9 @@ export RANLIB_FOR_TARGET = "${TARGET_PREFIX}ranlib"
 export STRIP_FOR_TARGET = "${TARGET_PREFIX}strip"
 export WINDRES_FOR_TARGET = "${TARGET_PREFIX}windres"
 
+# Ensure that the target sysroot is under the prefix
+prefix = "${SDKPATH}/sysroots"
+
 #
 # We need to override this and make sure the compiler can find staging
 #
