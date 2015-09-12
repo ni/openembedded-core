@@ -81,7 +81,9 @@ PACKAGE_INSTALL_ATTEMPTONLY ?= "${FEATURE_INSTALL_OPTIONAL}"
 
 IMGDEPLOYDIR = "${WORKDIR}/deploy-${PN}-image-complete"
 
-export PACKAGE_INSTALL_NODEPS ?= ""
+IMAGE_INSTALL_NODEPS ?= ""
+IMAGE_INSTALL_NODEPS[type] = "list"
+export PACKAGE_INSTALL_NODEPS ?= "${IMAGE_INSTALL_NODEPS}"
 
 # Images are generally built explicitly, do not need to be part of world.
 EXCLUDE_FROM_WORLD = "1"
