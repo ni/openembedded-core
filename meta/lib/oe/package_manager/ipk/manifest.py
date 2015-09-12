@@ -37,11 +37,13 @@ class PkgManifest(Manifest):
                 if var in self.vars_to_split:
                     split_pkgs = self._split_multilib(self.d.getVar(var))
                     if split_pkgs is not None:
-                        pkgs = dict(list(pkgs.items()) + list(split_pkgs.items()))
+                        for pkg_type, pkg_list in split_pkgs.items():
+                            pkgs[pkg_type] = pkgs.get(pkg_type, '') + ' ' + pkg_list
                 else:
                     pkg_list = self.d.getVar(var)
                     if pkg_list is not None:
-                        pkgs[self.var_maps[self.manifest_type][var]] = self.d.getVar(var)
+                        pkg_type = self.var_maps[self.manifest_type][var]
+                        pkgs[pkg_type] = pkgs.get(pkg_type, '') + ' ' + pkg_list
 
             for pkg_type in sorted(pkgs):
                 for pkg in sorted(pkgs[pkg_type].split()):
