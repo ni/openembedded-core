@@ -98,6 +98,7 @@ python __anonymous () {
         clsextend = oe.classextend.ClassExtender(variant, d)
 
         clsextend.map_depends_variable("PACKAGE_INSTALL")
+        clsextend.map_depends_variable("PACKAGE_INSTALL_NODEPS")
         clsextend.map_depends_variable("LINGUAS_INSTALL")
         clsextend.map_depends_variable("RDEPENDS")
         pinstall = d.getVar("LINGUAS_INSTALL") + " " + d.getVar("PACKAGE_INSTALL")
