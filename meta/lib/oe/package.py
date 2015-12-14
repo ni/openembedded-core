@@ -283,3 +283,99 @@ def read_shlib_providers(d):
                         shlib_provider[s[0]] = {}
                     shlib_provider[s[0]][s[1]] = (dep_pkg, s[2])
     return shlib_provider
+
+def archive_dir(dirPath, archivePath):
+    ''' Create tar.bz2 archive at archivePath from dirPath '''
+    import os, oe, bb
+
+    arDir = os.path.dirname(dirPath)
+    arName = os.path.basename(dirPath)
+
+    cmd = 'tar -c -I pbzip2 -f \"%s\" -C \"%s\" -p \"%s\"' % (archivePath, arDir, arName)
+    (retval, output) = oe.utils.getstatusoutput(cmd)
+    if retval:
+        bb.fatal('Failed to archive %s --> %s: %s %s' % (dirPath, archivePath, cmd, output))
+
+def do_install_source(d):
+    ''' Stage recipe's source for packaging '''
+    import os, oe, bb
+
+    pn = d.getVar("PN", True)
+
+    if d.getVar("ENABLE_SRC_INSTALL_%s" % pn, True) != "1":
+        return
+
+    packages = (d.getVar("PACKAGES", True) or "").split()
+    if ("%s-src" % pn) not in packages:
+        # Some recipes redefine PACKAGES without ${PN}-src. Don't stage
+        # anything in this case to avoid installed-vs-shipped warning.
+        return
+
+    urls = (d.getVar('SRC_URI', True) or "").split()
+    if len(urls) == 0:
+        return
+
+    workdir = d.getVar('WORKDIR', True)
+
+    # TODO rm_work() should clean this up
+    unpackTempDir = os.path.join(workdir, 'install-source-unpack-temp')
+    if os.path.exists(unpackTempDir):
+        bb.utils.remove(unpackTempDir, recurse=True)
+    os.makedirs(unpackTempDir, 0o755)
+
+    src_d = d.getVar("SRC_D", True)
+    if os.path.exists(src_d):
+        bb.warn("SRC_D already exist. Removing.")
+        bb.utils.remove(src_d, recurse=True)
+    os.makedirs(src_d, 0o755)
+
+    fetcher = bb.fetch2.Fetch(urls, d)
+
+    fileManif = []
+    for url in urls:
+        urlScheme = bb.fetch2.decodeurl(url)[0]
+        srcPath = fetcher.localpath(url)
+        srcName = os.path.basename(srcPath)
+
+        dstName = srcName
+        if os.path.isdir(srcPath):
+            dstName += '.tar.bz2'
+
+        dstPath = os.path.join(src_d, dstName)
+
+        # fetch() doesn't retrieve any actual files from git:// URLs,
+        # so we do an additional unpack() step to get something useful
+        # for these.
+        # TODO: May need to pre-process other revision control schemes
+        if urlScheme == 'git':
+            unpackPath = os.path.join(unpackTempDir, srcName)
+            if os.path.exists(unpackPath):
+                bb.utils.remove(unpackPath, recurse=True)
+            os.makedirs(unpackPath, 0o755)
+
+            fetcher.unpack(unpackPath, [url])
+
+            # unpack() puts actual source in a 'git' subdir
+            srcPath = os.path.join(unpackPath, 'git')
+
+        if os.path.exists(dstPath):
+            bb.warn('Duplicate file %s in SRC_URI. Overwriting.' % dstName)
+            bb.utils.remove(dstPath, recurse=True)
+
+        if not dstName in fileManif:
+            fileManif.append(dstName)
+
+        if os.path.isdir(srcPath):
+            archive_dir(srcPath, dstPath)
+        else:
+            bb.utils.copyfile(srcPath, dstPath)
+
+    manifFilePath = os.path.join(src_d, 'manifest')
+    if os.path.exists(manifFilePath):
+        bb.warn('manifest file found in SRC_URI. Overwriting.')
+        bb.utils.remove(manifFilePath, recurse=True)
+
+    with open(manifFilePath, 'w') as manif:
+        for fname in fileManif:
+            manif.write(fname)
+            manif.write('\n')
