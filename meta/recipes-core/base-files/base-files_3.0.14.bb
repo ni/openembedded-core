@@ -132,6 +132,9 @@ do_install () {
 
 	ln -sf /proc/mounts ${D}${sysconfdir}/mtab
 
+	install -m 0755 ${WORKDIR}/share/dot.profile ${D}${ROOT_HOME}/.profile
+	install -m 0755 ${WORKDIR}/share/dot.bashrc ${D}${ROOT_HOME}/.bashrc
+
 	# deal with hostname
 	if [ "${hostname}" ]; then
 		echo ${hostname} > ${D}${sysconfdir}/hostname
