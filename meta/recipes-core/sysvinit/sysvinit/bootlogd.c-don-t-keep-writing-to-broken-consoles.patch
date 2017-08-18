@@ -1,0 +1,45 @@
+Upstream-Status: Pending
+
+From: Richard Tollerton <rich.tollerton@ni.com>
+Date: Thu, 20 Apr 2017 12:41:48 -0500
+Subject: [PATCH] bootlogd.c: don't keep writing to broken consoles
+
+Writing to a nonexistent UART will always return EIO. The present code
+will spin in that event trying to write the same console data over and
+over. Stop doing that.
+
+Signed-off-by: Richard Tollerton <rich.tollerton@ni.com>
+Reviewed-by: Gratian Crisan <gratian.crisan@ni.com>
+---
+ src/bootlogd.c | 8 ++++++++
+ 1 file changed, 8 insertions(+)
+
+diff --git a/src/bootlogd.c b/src/bootlogd.c
+index dce1631..4e70ff9 100644
+--- a/src/bootlogd.c
++++ b/src/bootlogd.c
+@@ -492,4 +492,5 @@ int main(int argc, char **argv)
+ 	int		todo;
++	int		prev_eio = 0;
+ 
+ 	fp = NULL;
+ 	logfile = LOGFILE;
+@@ -642,8 +643,15 @@ int main(int argc, char **argv)
+ 					if (i >= 0) {
+ 						m -= i;
+ 						p += i;
++						prev_eio = 0;
+ 						continue;
+ 					}
++					/* Don't try to write the same data
++					 * again if we got EIO twice */
++					if (errno == EIO && prev_eio) {
++						m = 0;
++					}
++					prev_eio = (errno == EIO);
+ 					/*
+ 					 *	Handle EIO (somebody hung
+ 					 *	up our filedescriptor)
+-- 
+2.12.2
+
