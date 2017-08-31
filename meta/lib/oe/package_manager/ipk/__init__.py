@@ -19,6 +19,8 @@ class OpkgIndexer(Indexer):
         else:
             signer = None
 
+        enable_filelist = bb.utils.to_boolean(self.d.getVar('PACKAGE_ENABLE_FILELIST', True) or "False")
+
         if not os.path.exists(os.path.join(self.deploy_dir, "Packages")):
             open(os.path.join(self.deploy_dir, "Packages"), "w").close()
 
@@ -33,14 +35,18 @@ class OpkgIndexer(Indexer):
                 pkgs_dir = os.path.join(self.deploy_dir, arch)
                 pkgs_file = os.path.join(pkgs_dir, "Packages")
 
+                filelist_cmd = ""
+                if enable_filelist:
+                    filelist_cmd = '-l %s.filelist' % (pkgs_file)
+
                 if not os.path.isdir(pkgs_dir):
                     continue
 
                 if not os.path.exists(pkgs_file):
                     open(pkgs_file, "w").close()
 
-                index_cmds.add('%s --checksum md5 --checksum sha256 -r %s -p %s -m %s' %
-                                  (opkg_index_cmd, pkgs_file, pkgs_file, pkgs_dir))
+                index_cmds.add('%s --checksum md5 --checksum sha256 -r %s -p %s -m %s %s' %
+                                  (opkg_index_cmd, pkgs_file, pkgs_file, filelist_cmd, pkgs_dir))
 
                 index_sign_files.add(pkgs_file)
 
