@@ -221,7 +221,9 @@ python check_sdk_sysroots() {
             targetPath = os.path.join(linkDirPath, targetPath)
         targetPath = norm_path(targetPath)
 
-        if SCAN_ROOT != os.path.commonprefix( [SCAN_ROOT, targetPath] ):
+        targetCommonPrefix = norm_path(os.path.commonprefix( [SCAN_ROOT, targetPath] ))
+        if SCAN_ROOT != targetCommonPrefix:
+            bb.note("'{0!s}' != '{1!s}'".format(SCAN_ROOT, targetCommonPrefix))
             bb.error("Escaping symlink {0!s} --> {1!s}".format(linkPath, targetPath))
             return
 
