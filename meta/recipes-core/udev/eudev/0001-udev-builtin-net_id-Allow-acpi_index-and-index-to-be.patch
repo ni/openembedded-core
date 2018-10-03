@@ -1,0 +1,51 @@
+From 9ce6279f1373bf23f5fbe8583e3ebe2b771144e3 Mon Sep 17 00:00:00 2001
+From: Joe Hershberger <joe.hershberger@ni.com>
+Date: Fri, 28 Sep 2018 16:20:09 -0500
+Subject: [PATCH v3] udev: builtin-net_id: Allow acpi_index and index to be "0"
+
+0 can be a valid index returned by the BIOS, so allow that by using the
+parsing function safe_atolu() to check for errors without excluding the
+valid value "0".
+
+Also submitted to systemd as https://github.com/systemd/systemd/pull/10240
+
+Signed-off-by: Joe Hershberger <joe.hershberger@ni.com>
+
+---
+ src/udev/udev-builtin-net_id.c | 10 +++++-----
+ 1 file changed, 5 insertions(+), 5 deletions(-)
+
+diff --git a/src/udev/udev-builtin-net_id.c b/src/udev/udev-builtin-net_id.c
+index 448920507..d0229b8d2 100644
+--- a/src/udev/udev-builtin-net_id.c
++++ b/src/udev/udev-builtin-net_id.c
+@@ -129,11 +129,11 @@ struct netnames {
+ 
+ /* retrieve on-board index number and label from firmware */
+ static int dev_pci_onboard(struct udev_device *dev, struct netnames *names) {
+-        unsigned dev_port = 0;
++        unsigned long idx, dev_port = 0;
+         size_t l;
+         char *s;
+         const char *attr;
+-        int idx;
++        int r;
+ 
+         /* ACPI _DSM  -- device specific method for naming a PCI or PCI Express device */
+         attr = udev_device_get_sysattr_value(names->pcidev, "acpi_index");
+@@ -143,9 +143,9 @@ static int dev_pci_onboard(struct udev_device *dev, struct netnames *names) {
+         if (!attr)
+                 return -ENOENT;
+ 
+-        idx = strtoul(attr, NULL, 0);
+-        if (idx <= 0)
+-                return -EINVAL;
++        r = safe_atolu(attr, &idx);
++        if (r < 0)
++                return r;
+ 
+         /* kernel provided port index for multiple ports on a single PCI function */
+         attr = udev_device_get_sysattr_value(dev, "dev_port");
+-- 
+2.11.0
+
