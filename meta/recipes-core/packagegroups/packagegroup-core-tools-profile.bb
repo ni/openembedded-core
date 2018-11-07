@@ -53,6 +53,7 @@ VALGRIND_armv6 = ""
 VALGRIND_armeb = ""
 VALGRIND_aarch64 = ""
 VALGRIND_linux-gnux32 = ""
+VALGRIND_linux-gnun32 = ""
 
 RDEPENDS_${PN} = "\
     ${PROFILETOOLS} \
