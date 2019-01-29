@@ -201,3 +201,7 @@ RDEPENDS_${PN}-misc = "perl"
 RDEPENDS_${PN}-ptest += "openssl-bin perl perl-modules bash python"
 
 BBCLASSEXTEND = "native nativesdk"
+
+inherit multilib_script
+
+MULTILIB_SCRIPTS = "${PN}-bin:${bindir}/c_rehash"
