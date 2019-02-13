@@ -1,0 +1,34 @@
+#!/bin/sh
+### BEGIN INIT INFO
+# Provides:          jitterentropy-rngd
+# Required-Start:    $local_fs
+# Required-Stop:     $local_fs
+# Default-Start:     S
+# Default-Stop:      0 6
+# Short-Description: Jitterentropy Gatherer Daemon
+# Description:       Using the Jitter RNG core, the rngd provides an entropy
+#                    source that feeds into the Linux /dev/random device if
+#                    its entropy runs low. It updates the /dev/random entropy
+#                    estimator such that the newly provided entropy unblocks
+#                    /dev/random.
+### END INIT INFO
+
+DAEMON=/usr/sbin/jitterentropy-rngd
+
+test -x $DAEMON || exit 0
+
+case "$1" in
+	start)
+		start-stop-daemon -S -x $DAEMON
+		;;
+	stop)
+		start-stop-daemon -K -x $DAEMON
+		;;
+	*)
+		echo "Usage: jitterentropy-rngd {start|stop}" >&2
+		exit 1
+		;;
+esac
+
+exit 0
+
