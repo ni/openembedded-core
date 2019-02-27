@@ -197,7 +197,7 @@ CONFFILES_openssl-conf = "${sysconfdir}/ssl/openssl.cnf"
 
 RRECOMMENDS_libcrypto += "openssl-conf"
 RDEPENDS_${PN}-misc = "perl"
-RDEPENDS_${PN}-ptest += "openssl-bin perl perl-modules bash python"
+RDEPENDS_${PN}-ptest += "openssl-bin perl perl-modules bash"
 
 BBCLASSEXTEND = "native nativesdk"
 
