@@ -1,6 +1,6 @@
 SUMMARY = "Tools to change and administer password and group data"
-HOMEPAGE = "http://pkg-shadow.alioth.debian.org"
-BUGTRACKER = "https://alioth.debian.org/tracker/?group_id=30580"
+HOMEPAGE = "http://github.com/shadow-maint/shadow"
+BUGTRACKER = "http://github.com/shadow-maint/shadow/issues"
 SECTION = "base/utils"
 LICENSE = "BSD | Artistic-1.0"
 LIC_FILES_CHKSUM = "file://COPYING;md5=ed80ff1c2b40843cf5768e5229cf16e5 \
@@ -59,8 +59,8 @@ EXTRA_OECONF += "--without-audit \
 NSCDOPT = ""
 NSCDOPT_class-native = "--without-nscd"
 NSCDOPT_class-nativesdk = "--without-nscd"
-NSCDOPT_libc-glibc = "${@bb.utils.contains('DISTRO_FEATURES', 'libc-spawn', '--with-nscd', '--without-nscd', d)}"
-          
+NSCDOPT_libc-glibc = "--with-nscd"
+
 PAM_PLUGINS = "libpam-runtime \
                pam-plugin-faildelay \
                pam-plugin-securetty \
@@ -137,7 +137,7 @@ do_install_append() {
 		sed -i -f ${WORKDIR}/login_defs_pam.sed ${D}${sysconfdir}/login.defs
 	fi
 
-	install -d ${D}${sbindir} ${D}${base_sbindir} ${D}${base_bindir} 
+	install -d ${D}${sbindir} ${D}${base_sbindir} ${D}${base_bindir}
 
 	# Move binaries to the locations we want
 	rm ${D}${sbindir}/vigr
