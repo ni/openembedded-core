@@ -33,6 +33,7 @@ SRC_URI = "https://lttng.org/files/lttng-tools/lttng-tools-${PV}.tar.bz2 \
            file://0001-tests-do-not-strip-a-helper-library.patch \
            file://run-ptest \
            file://lttng-sessiond.service \
+           file://0001-tests-regression-disable-the-tools-live-tests.patch \
            "
 
 SRC_URI[md5sum] = "68ed78f7fa4235477ea577e48b3cd245"
