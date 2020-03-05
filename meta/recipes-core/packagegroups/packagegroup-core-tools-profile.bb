@@ -47,6 +47,7 @@ LTTNGTOOLS_riscv64 = ""
 LTTNGMODULES = "lttng-modules"
 
 BABELTRACE = "babeltrace"
+BABELTRACE2 = "babeltrace2"
 
 # valgrind does not work on the following configurations/architectures
 
@@ -67,6 +68,7 @@ RDEPENDS_${PN} = "\
     ${LTTNGTOOLS} \
     ${LTTNGMODULES} \
     ${BABELTRACE} \
+    ${BABELTRACE2} \
     ${SYSTEMTAP} \
     ${VALGRIND} \
     "
