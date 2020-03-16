@@ -1,0 +1,685 @@
+From f89977ed3b3eb990ffc653e21376317f0bdb5fd6 Mon Sep 17 00:00:00 2001
+From: Chaitanya Vadrevu <chaitanya.vadrevu@ni.com>
+Date: Fri, 13 Mar 2020 14:23:29 -0500
+Subject: [PATCH] xinput_calibrator: Add support for libinput
+
+Current implementation only supports Evdev, Usbtouchscreen or standard
+Xorg calibrators. When libinput is installed, the standard Xorg
+calibrator ends up being used but the generated conf file does not
+work. This patch adds support for libinput by adding a new calibrator
+so that xinput_calibrator works even when libinput is installed.
+
+This is based on code from Evdev.cpp and Evdev.hpp with the following
+changes
+  o Removed evdev specific calibration code and output formats
+  o Added dynamic calibration code for libinput
+  o Added suport for xinput and xorg.conf.d output types
+
+Signed-off-by: Chaitanya Vadrevu <chaitanya.vadrevu@ni.com>
+---
+ src/Makefile.am             |   4 +-
+ src/calibrator/LibInput.cpp | 494 ++++++++++++++++++++++++++++++++++++
+ src/calibrator/LibInput.hpp |  84 ++++++
+ src/calibrator/Makefile.am  |   1 +
+ src/main_common.cpp         |  13 +
+ 5 files changed, 594 insertions(+), 2 deletions(-)
+ create mode 100644 src/calibrator/LibInput.cpp
+ create mode 100644 src/calibrator/LibInput.hpp
+
+diff --git a/src/Makefile.am b/src/Makefile.am
+index f52b71b..6f8d788 100644
+--- a/src/Makefile.am
++++ b/src/Makefile.am
+@@ -32,7 +32,7 @@ AM_CXXFLAGS = -Wall -ansi -pedantic
+ 
+ bin_PROGRAMS = xinput_calibrator tester
+ 
+-COMMON_SRCS=calibrator.cpp calibrator/XorgPrint.cpp calibrator/Evdev.cpp calibrator/Usbtouchscreen.cpp main_common.cpp gui/gui_common.cpp
++COMMON_SRCS=calibrator.cpp calibrator/XorgPrint.cpp calibrator/Evdev.cpp calibrator/LibInput.cpp calibrator/Usbtouchscreen.cpp main_common.cpp gui/gui_common.cpp
+ 
+ # only one of the BUILD_ flags should be set
+ if BUILD_X11
+@@ -51,7 +51,7 @@ xinput_calibrator_CXXFLAGS = $(XINPUT_CFLAGS) $(GTKMM_CFLAGS) $(AM_CXXFLAGS)
+ xinput_calibrator_LDFLAGS = -Wl,--as-needed
+ endif
+ 
+-tester_SOURCES = tester.cpp calibrator.cpp calibrator/Tester.cpp calibrator/Evdev.cpp calibrator/EvdevTester.cpp
++tester_SOURCES = tester.cpp calibrator.cpp calibrator/Tester.cpp calibrator/Evdev.cpp calibrator/LibInput.cpp calibrator/EvdevTester.cpp
+ tester_LDADD = $(XINPUT_LIBS) $(XRANDR_LIBS) $(X11_LIBS)
+ tester_CXXFLAGS = $(XINPUT_CFLAGS) $(X11_CFLAGS) $(XRANDR_CFLAGS) $(AM_CXXFLAGS)
+ 
+diff --git a/src/calibrator/LibInput.cpp b/src/calibrator/LibInput.cpp
+new file mode 100644
+index 0000000..405e81a
+--- /dev/null
++++ b/src/calibrator/LibInput.cpp
+@@ -0,0 +1,494 @@
++/*
++ * Copyright (c) 2009 Tias Guns
++ * Copyright 2007 Peter Hutterer (xinput_ methods from xinput)
++ * Copyright (c) 2011 Antoine Hue (invertX/Y)
++ *
++ * Permission is hereby granted, free of charge, to any person obtaining a copy
++ * of this software and associated documentation files (the "Software"), to deal
++ * in the Software without restriction, including without limitation the rights
++ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
++ * copies of the Software, and to permit persons to whom the Software is
++ * furnished to do so, subject to the following conditions:
++ *
++ * The above copyright notice and this permission notice shall be included in
++ * all copies or substantial portions of the Software.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
++ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
++ * THE SOFTWARE.
++ */
++
++#include "calibrator/LibInput.hpp"
++
++#include <X11/Xlib.h>
++#include <X11/Xatom.h>
++#include <ctype.h>
++#include <cstdio>
++#include <cstring>
++#include <cstdlib>
++#include <cmath>
++
++#ifndef EXIT_SUCCESS
++#define EXIT_SUCCESS 1
++#endif
++#ifndef EXIT_FAILURE
++#define EXIT_FAILURE 0
++#endif
++
++// Constructor
++CalibratorLibInput::CalibratorLibInput(const char* const device_name0,
++                                 const XYinfo& axys0,
++                                 XID device_id,
++                                 const int thr_misclick,
++                                 const int thr_floatclick,
++                                 const OutputType output_type,
++                                 const char* geometry,
++                                 const bool use_timeout,
++                                 const char* output_filename)
++  : Calibrator(device_name0, axys0, thr_misclick, thr_floatclick, output_type, geometry, use_timeout, output_filename)
++{
++    // init
++    display = XOpenDisplay(NULL);
++    if (display == NULL) {
++        throw WrongCalibratorException("LibInput: Unable to connect to X server");
++    }
++
++    // normaly, we already have the device id
++    if (device_id == (XID)-1) {
++        devInfo = xinput_find_device_info(display, device_name, False);
++        if (!devInfo) {
++            XCloseDisplay(display);
++            throw WrongCalibratorException("LibInput: Unable to find device");
++        }
++        device_id = devInfo->id;
++    }
++
++    dev = XOpenDevice(display, device_id);
++    if (!dev) {
++        XCloseDisplay(display);
++        throw WrongCalibratorException("LibInput: Unable to open device");
++    }
++
++#ifndef HAVE_XI_PROP
++    throw WrongCalibratorException("LibInput: you need at least libXi 1.2 and inputproto 1.5 for dynamic recalibration of libinput.");
++#else
++
++    // XGetDeviceProperty vars
++    Atom            property;
++    Atom            act_type;
++    int             act_format;
++    unsigned long   nitems, bytes_after;
++    unsigned char   *data;
++
++    // get "LibInput Axis Calibration" property
++    property = xinput_parse_atom(display, "Coordinate Transformation Matrix");
++    if (XGetDeviceProperty(display, dev, property, 0, 1000, False,
++                           AnyPropertyType, &act_type, &act_format,
++                           &nitems, &bytes_after, &data) != Success)
++    {
++        XCloseDevice(display, dev);
++        XCloseDisplay(display);
++        throw WrongCalibratorException("LibInput: \"LibInput Axis Calibration\" property missing, not a (valid) libinput device");
++
++    }
++
++    printf("Calibrating LibInput driver for \"%s\" id=%i\n", device_name, (int)device_id);
++    printf("\tcurrent calibration values (from XInput): min_x=%d, max_x=%d and min_y=%d, max_y=%d\n",
++                old_axys.x.min, old_axys.x.max, old_axys.y.min, old_axys.y.max);
++#endif // HAVE_XI_PROP
++
++}
++// protected pass-through constructor for subclasses
++CalibratorLibInput::CalibratorLibInput(const char* const device_name0,
++                                 const XYinfo& axys0,
++                                 const int thr_misclick,
++                                 const int thr_floatclick,
++                                 const OutputType output_type,
++                                 const char* geometry,
++                                 const bool use_timeout,
++                                 const char* output_filename)
++  : Calibrator(device_name0, axys0, thr_misclick, thr_floatclick, output_type, geometry, output_filename) { }
++
++// Destructor
++CalibratorLibInput::~CalibratorLibInput () {
++    XCloseDevice(display, dev);
++    XCloseDisplay(display);
++}
++
++// From Calibrator but with libinput specific invertion option
++// KEEP IN SYNC with Calibrator::finish() !!
++bool CalibratorLibInput::finish(int width, int height)
++{
++    if (get_numclicks() != NUM_POINTS) {
++        return false;
++    }
++
++    // new axis origin and scaling
++    // based on old_axys: inversion/swapping is relative to the old axis
++    XYinfo new_axis(old_axys);
++
++
++    // calculate average of clicks
++    float x_min = (clicked.x[UL] + clicked.x[LL])/2.0;
++    float x_max = (clicked.x[UR] + clicked.x[LR])/2.0;
++    float y_min = (clicked.y[UL] + clicked.y[UR])/2.0;
++    float y_max = (clicked.y[LL] + clicked.y[LR])/2.0;
++
++
++    // When libinput detects an invert_X/Y option,
++    // it performs the following *crazy* code just before returning
++    // val = (pLibInput->absinfo[i].maximum - val + pLibInput->absinfo[i].minimum);
++    // undo this crazy step before doing the regular calibration routine
++    if (old_axys.x.invert) {
++        x_min = width - x_min;
++        x_max = width - x_max;
++        // avoid invert_x property from here on,
++        // the calibration code can handle this dynamically!
++        new_axis.x.invert = false;
++    }
++    if (old_axys.y.invert) {
++        y_min = height - y_min;
++        y_max = height - y_max;
++        // avoid invert_y property from here on,
++        // the calibration code can handle this dynamically!
++        new_axis.y.invert = false;
++    }
++    // end of libinput inversion crazyness
++
++
++    // Should x and y be swapped?
++    if (abs(clicked.x[UL] - clicked.x[UR]) < abs(clicked.y[UL] - clicked.y[UR])) {
++        new_axis.swap_xy = !new_axis.swap_xy;
++        std::swap(x_min, y_min);
++        std::swap(x_max, y_max);
++    }
++
++    // the screen was divided in num_blocks blocks, and the touch points were at
++    // one block away from the true edges of the screen.
++    const float block_x = width/(float)num_blocks;
++    const float block_y = height/(float)num_blocks;
++    // rescale these blocks from the range of the drawn touchpoints to the range of the
++    // actually clicked coordinates, and substract/add from the clicked coordinates
++    // to obtain the coordinates corresponding to the edges of the screen.
++    float scale_x = (x_max - x_min)/(width - 2*block_x);
++    x_min -= block_x * scale_x;
++    x_max += block_x * scale_x;
++    float scale_y = (y_max - y_min)/(height - 2*block_y);
++    y_min -= block_y * scale_y;
++    y_max += block_y * scale_y;
++
++    // now, undo the transformations done by the X server, to obtain the true 'raw' value in X.
++    // The raw value was scaled from old_axis to the device min/max, and from the device min/max
++    // to the screen min/max
++    // hence, the reverse transformation is from screen to old_axis
++    x_min = scaleAxis(x_min, old_axys.x.max, old_axys.x.min, width, 0);
++    x_max = scaleAxis(x_max, old_axys.x.max, old_axys.x.min, width, 0);
++    y_min = scaleAxis(y_min, old_axys.y.max, old_axys.y.min, height, 0);
++    y_max = scaleAxis(y_max, old_axys.y.max, old_axys.y.min, height, 0);
++
++
++    // round and put in new_axis struct
++    new_axis.x.min = round(x_min); new_axis.x.max = round(x_max);
++    new_axis.y.min = round(y_min); new_axis.y.max = round(y_max);
++
++    // finish the data, driver/calibrator specific
++    return finish_data(new_axis);
++}
++
++// Activate calibrated data and output it
++bool CalibratorLibInput::finish_data(const XYinfo &new_axys)
++{
++    bool success = true;
++
++    printf("\nDoing dynamic recalibration:\n");
++
++    // LibInput Calibration
++    set_calibration(new_axys);
++
++    // close
++    XSync(display, False);
++
++    printf("\t--> Making the calibration permanent <--\n");
++    switch (output_type) {
++        case OUTYPE_AUTO:
++            // xorg.conf.d or alternatively xinput commands
++            if (has_xorgconfd_support()) {
++                success &= output_xorgconfd(new_axys);
++            } else {
++                success &= output_xinput(new_axys);
++            }
++            break;
++        case OUTYPE_XORGCONFD:
++            success &= output_xorgconfd(new_axys);
++            break;
++        case OUTYPE_XINPUT:
++            success &= output_xinput(new_axys);
++            break;
++        default:
++            fprintf(stderr, "ERROR: LibInput Calibrator does not support the supplied --output-type\n");
++            success = false;
++    }
++
++    return success;
++}
++
++void CalibratorLibInput::set_calibration(const XYinfo new_axys)
++{
++    float width_x = new_axys.x.max - new_axys.x.min;
++    float height_y = new_axys.y.max - new_axys.y.min;
++
++    float c0 = old_axys.x.max / width_x;
++    float c1 = -new_axys.x.min / width_x;
++    float c2 = old_axys.y.max / height_y;
++    float c3 = -new_axys.y.min / height_y;
++
++    printf("\tSetting calibration data: %f, %f, %f, %f\n", c0, c1, c2, c3);
++
++    if (sizeof(long) == 4) {
++       float arr_cmd[] = { c0, 0, c1,
++                           0, c2, c3,
++                           0, 0, 1 };
++       XChangeDeviceProperty(display, dev, XInternAtom(display, "Coordinate Transformation Matrix", 0), XInternAtom(display, "FLOAT", 0),
++                      32, PropModeReplace, (unsigned char*)arr_cmd, 9);
++    } else {
++       float arr_cmd[] = { c0, 0, 0, 0, c1, 0,
++                           0, 0, c2, 0, c3, 0,
++                           0, 0, 0, 0, 1, 0 };
++       XChangeDeviceProperty(display, dev, XInternAtom(display, "Coordinate Transformation Matrix", 0), XInternAtom(display, "FLOAT", 0),
++                      32, PropModeReplace, (unsigned char*)arr_cmd, 9);
++    }
++}
++
++Atom CalibratorLibInput::xinput_parse_atom(Display *display, const char *name)
++{
++    Bool is_atom = True;
++    int i;
++
++    for (i = 0; name[i] != '\0'; i++) {
++        if (!isdigit(name[i])) {
++            is_atom = False;
++            break;
++        }
++    }
++
++    if (is_atom)
++        return atoi(name);
++    else
++        return XInternAtom(display, name, False);
++}
++
++XDeviceInfo* CalibratorLibInput::xinput_find_device_info(
++Display *display, const char *name, Bool only_extended)
++{
++    XDeviceInfo	*devices;
++    XDeviceInfo *found = NULL;
++    int		loop;
++    int		num_devices;
++    int		len = strlen(name);
++    Bool	is_id = True;
++    XID		id = (XID)-1;
++
++    for (loop=0; loop<len; loop++) {
++        if (!isdigit(name[loop])) {
++            is_id = False;
++            break;
++        }
++    }
++
++    if (is_id) {
++        id = atoi(name);
++    }
++
++    devices = XListInputDevices(display, &num_devices);
++
++    for (loop=0; loop<num_devices; loop++) {
++        if ((!only_extended || (devices[loop].use >= IsXExtensionDevice)) &&
++            ((!is_id && strcmp(devices[loop].name, name) == 0) ||
++             (is_id && devices[loop].id == id))) {
++            if (found) {
++                fprintf(stderr,
++                        "Warning: There are multiple devices named \"%s\".\n"
++                        "To ensure the correct one is selected, please use "
++                        "the device ID instead.\n\n", name);
++                return NULL;
++            } else {
++                found = &devices[loop];
++            }
++        }
++    }
++
++    return found;
++}
++
++// Set Integer property on  X
++bool CalibratorLibInput::xinput_do_set_float_prop( const char * name,
++                                         Display *display,
++                                         int format,
++                                         int argc,
++                                         const float *argv )
++{
++#ifndef HAVE_XI_PROP
++    return false;
++#else
++
++    Atom          prop;
++    Atom          old_type;
++    int           i;
++    int           old_format;
++    unsigned long act_nitems, bytes_after;
++
++    union {
++        unsigned char *c;
++        short *s;
++        long *l;
++        Atom *a;
++    } data;
++
++    if (argc < 1)
++    {
++        fprintf(stderr, "Wrong usage of xinput_do_set_prop, need at least 1 arguments\n");
++        return false;
++    }
++
++    prop = xinput_parse_atom(display, name);
++
++    if (prop == None) {
++        fprintf(stderr, "invalid property %s\n", name);
++        return false;
++    }
++
++    if ( format == 0) {
++        if (XGetDeviceProperty(display, dev, prop, 0, 0, False, AnyPropertyType,
++                               &old_type, &old_format, &act_nitems,
++                               &bytes_after, &data.c) != Success) {
++            fprintf(stderr, "failed to get property type and format for %s\n",
++                    name);
++            return false;
++        } else {
++            format = old_format;
++        }
++
++        XFree(data.c);
++    }
++
++    data.c = (unsigned char*)calloc(argc, sizeof(long));
++
++    for (i = 0; i < argc; i++) {
++      switch (format) {
++        case 8:
++            data.c[i] = argv[i];
++        case 16:
++            data.s[i] = argv[i];
++            break;
++        case 32:
++            data.l[i] = *(long*)&argv[i];
++            break;
++
++        default:
++            fprintf(stderr, "unexpected size for property %s\n", name);
++            return false;
++      }
++    }
++
++    XChangeDeviceProperty(display, dev, prop, XInternAtom(display, "FLOAT", 0),
++                      format, PropModeReplace, data.c, argc);
++    free(data.c);
++    return true;
++#endif // HAVE_XI_PROP
++
++}
++
++bool CalibratorLibInput::output_xorgconfd(const XYinfo new_axys)
++{
++    const char* sysfs_name = get_sysfs_name();
++    bool not_sysfs_name = (sysfs_name == NULL);
++    if (not_sysfs_name)
++        sysfs_name = "!!Name_Of_TouchScreen!!";
++
++    if(output_filename == NULL || not_sysfs_name)
++        printf("  copy the snippet below into '/etc/X11/xorg.conf.d/99-calibration.conf' (/usr/share/X11/xorg.conf.d/ in some distro's)\n");
++    else
++        printf("  writing xorg.conf calibration data to '%s'\n", output_filename);
++
++    float width_x = new_axys.x.max - new_axys.x.min;
++    float height_y = new_axys.y.max - new_axys.y.min;
++
++    float c0 = old_axys.x.max / width_x;
++    float c1 = -new_axys.x.min / width_x;
++    float c2 = old_axys.y.max / height_y;
++    float c3 = -new_axys.y.min / height_y;
++
++    // xorg.conf.d snippet
++    char line[MAX_LINE_LEN];
++    std::string outstr;
++
++    outstr += "Section \"InputClass\"\n";
++    outstr += "	Identifier	\"calibration\"\n";
++    sprintf(line, "	MatchProduct	\"%s\"\n", sysfs_name);
++    outstr += line;
++    sprintf(line, "	Option	\"TransformationMatrix\"	\"%f 0 %f 0 %f %f 0 0 1\"\n",
++                c0, c1, c2, c3);
++    outstr += line;
++    outstr += "EndSection\n";
++
++    // console out
++    printf("%s", outstr.c_str());
++    if (not_sysfs_name)
++        printf("\nChange '%s' to your device's name in the snippet above.\n", sysfs_name);
++    // file out
++    else if(output_filename != NULL) {
++        FILE* fid = fopen(output_filename, "w");
++        if (fid == NULL) {
++            fprintf(stderr, "Error: Can't open '%s' for writing. Make sure you have the necessary rights\n", output_filename);
++            fprintf(stderr, "New calibration data NOT saved\n");
++            return false;
++        }
++        fprintf(fid, "%s", outstr.c_str());
++        fclose(fid);
++    }
++
++    return true;
++}
++
++bool CalibratorLibInput::output_xinput(const XYinfo new_axys)
++{
++    if(output_filename == NULL)
++        printf("  Install the 'xinput' tool and copy the command(s) below in a script that starts with your X session\n");
++    else
++        printf("  writing calibration script to '%s'\n", output_filename);
++
++    float width_x = new_axys.x.max - new_axys.x.min;
++    float height_y = new_axys.y.max - new_axys.y.min;
++
++    float c0 = old_axys.x.max / width_x;
++    float c1 = -new_axys.x.min / width_x;
++    float c2 = old_axys.y.max / height_y;
++    float c3 = -new_axys.y.min / height_y;
++
++    // create startup script
++    char line[MAX_LINE_LEN];
++    std::string outstr;
++
++    sprintf(line, "    xinput set-prop \"%s\" \"Coordinate Transformation Matrix\" %f 0 %f 0 %f %f 0 0 1\n", device_name, c0, c1, c2, c3);
++    outstr += line;
++
++    // console out
++    printf("%s", outstr.c_str());
++    // file out
++    if(output_filename != NULL) {
++		FILE* fid = fopen(output_filename, "w");
++		if (fid == NULL) {
++			fprintf(stderr, "Error: Can't open '%s' for writing. Make sure you have the necessary rights\n", output_filename);
++			fprintf(stderr, "New calibration data NOT saved\n");
++			return false;
++		}
++		fprintf(fid, "%s", outstr.c_str());
++		fclose(fid);
++    }
++
++    return true;
++}
+diff --git a/src/calibrator/LibInput.hpp b/src/calibrator/LibInput.hpp
+new file mode 100644
+index 0000000..202cbe3
+--- /dev/null
++++ b/src/calibrator/LibInput.hpp
+@@ -0,0 +1,84 @@
++/*
++ * Copyright (c) 2009 Tias Guns
++ * Copyright 2007 Peter Hutterer (xinput_ methods from xinput)
++ *
++ * Permission is hereby granted, free of charge, to any person obtaining a copy
++ * of this software and associated documentation files (the "Software"), to deal
++ * in the Software without restriction, including without limitation the rights
++ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
++ * copies of the Software, and to permit persons to whom the Software is
++ * furnished to do so, subject to the following conditions:
++ *
++ * The above copyright notice and this permission notice shall be included in
++ * all copies or substantial portions of the Software.
++ *
++ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
++ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
++ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
++ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
++ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
++ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
++ * THE SOFTWARE.
++ */
++
++#ifndef CALIBRATOR_LIBINPUT_HPP
++#define CALIBRATOR_LIBINPUT_HPP
++
++#include "calibrator.hh"
++#include <X11/extensions/XInput.h>
++
++/***************************************
++ * Class for dynamic libinput calibration
++ * uses xinput "LibInput Axis Calibration"
++ ***************************************/
++class CalibratorLibInput: public Calibrator
++{
++private:
++    Display     *display;
++    XDeviceInfo *devInfo;
++    XDevice     *dev;
++
++protected:
++    // protected constructor: should only be used by subclasses!
++    // (pass-through to Calibrator)
++    CalibratorLibInput(const char* const device_name,
++                    const XYinfo& axys,
++                    const int thr_misclick=0,
++                    const int thr_doubleclick=0,
++                    const OutputType output_type=OUTYPE_AUTO,
++                    const char* geometry=0,
++                    const bool use_timeout=false,
++                    const char* output_filename = 0);
++
++public:
++    CalibratorLibInput(const char* const device_name,
++                    const XYinfo& axys,
++                    XID device_id=(XID)-1,
++                    const int thr_misclick=0,
++                    const int thr_doubleclick=0,
++                    const OutputType output_type=OUTYPE_AUTO,
++                    const char* geometry=0,
++                    const bool use_timeout=false,
++                    const char* output_filename = 0);
++    virtual ~CalibratorLibInput();
++
++    /// calculate and apply the calibration
++    virtual bool finish(int width, int height);
++    virtual bool finish_data(const XYinfo &new_axys);
++
++    void set_calibration(const XYinfo new_axys);
++
++    // xinput_ functions (from the xinput project)
++    Atom xinput_parse_atom(Display *display, const char* name);
++    XDeviceInfo* xinput_find_device_info(Display *display, const char* name, Bool only_extended);
++    bool xinput_do_set_float_prop( const char * name,
++                                 Display *display,
++                                 int format,
++                                 int argc,
++                                 const float* argv);
++protected:
++    bool output_xorgconfd(const XYinfo new_axys);
++    bool output_xinput(const XYinfo new_axys);
++};
++
++#endif
+diff --git a/src/calibrator/Makefile.am b/src/calibrator/Makefile.am
+index ac62ea6..0c3289a 100644
+--- a/src/calibrator/Makefile.am
++++ b/src/calibrator/Makefile.am
+@@ -1,5 +1,6 @@
+ EXTRA_DIST = \
+ 	Evdev.cpp \
++	LibInput.cpp \
+ 	Usbtouchscreen.cpp \
+ 	XorgPrint.cpp \
+ 	Tester.cpp \
+diff --git a/src/main_common.cpp b/src/main_common.cpp
+index da8a3a3..40e1ab1 100644
+--- a/src/main_common.cpp
++++ b/src/main_common.cpp
+@@ -26,6 +26,7 @@
+ // Calibrator implementations
+ #include "calibrator/Usbtouchscreen.hpp"
+ #include "calibrator/Evdev.hpp"
++#include "calibrator/LibInput.hpp"
+ #include "calibrator/XorgPrint.hpp"
+ 
+ #include <cstring>
+@@ -410,6 +411,18 @@ Calibrator* Calibrator::make_calibrator(int argc, char** argv)
+             printf("DEBUG: Not evdev calibrator: %s\n", x.what());
+     }
+ 
++    try {
++        // next, try LibInput driver
++        return new CalibratorLibInput(device_name, device_axys, device_id,
++            thr_misclick, thr_doubleclick, output_type, geometry,
++            use_timeout, output_filename);
++
++    } catch(WrongCalibratorException& x) {
++        if (verbose)
++            printf("DEBUG: Not libinput calibrator: %s\n", x.what());
++    }
++
++
+     // lastly, presume a standard Xorg driver (evtouch, mutouch, ...)
+     return new CalibratorXorgPrint(device_name, device_axys,
+             thr_misclick, thr_doubleclick, output_type, geometry,
+-- 
+2.17.1
+

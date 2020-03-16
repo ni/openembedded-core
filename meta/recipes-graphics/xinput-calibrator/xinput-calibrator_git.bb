@@ -16,6 +16,7 @@ SRC_URI = "git://github.com/kreijack/xinput_calibrator.git;branch=libinput \
            file://30xinput_calibrate.sh \
            file://Allow-xinput_calibrator_pointercal.sh-to-be-run-as-n.patch \
            file://0001-calibrator.hh-Include-string-to-get-std-string.patch \
+           file://xinput_calibrator-Add-support-for-libinput.patch \
            "
 
 S = "${WORKDIR}/git"
