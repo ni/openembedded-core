@@ -20,6 +20,11 @@ EXTRA_OECONF_append = " --cache-file=${B}/config.cache"
 # Disable ifuncs for libatomic on arm conflicts -march/-mcpu
 EXTRA_OECONF_append_arm = " libat_cv_have_ifunc=no "
 
+DISABLE_STATIC_class-nativesdk ?= ""
+
+# Newlib does not support symbol versioning on libsdtcc++
+SYMVERS_CONF_libc-newlib = ""
+
 # Building with thumb enabled on armv6t fails
 ARM_INSTRUCTION_SET_armv6 = "arm"
 
