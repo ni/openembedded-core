@@ -15,31 +15,30 @@ Reviewed-by: Gratian Crisan <gratian.crisan@ni.com>
  1 file changed, 8 insertions(+)
 
 diff --git a/src/bootlogd.c b/src/bootlogd.c
-index dce1631..4e70ff9 100644
+index 8b07903..0c6421f 100644
 --- a/src/bootlogd.c
 +++ b/src/bootlogd.c
-@@ -492,4 +492,5 @@ int main(int argc, char **argv)
+@@ -487,6 +487,7 @@ int main(int argc, char **argv)
+ 	/* int		realfd;   -- this is now unused */
+ 	int		n, m, i;
  	int		todo;
 +	int		prev_eio = 0;
- 
- 	fp = NULL;
- 	logfile = LOGFILE;
-@@ -642,8 +643,15 @@ int main(int argc, char **argv)
- 					if (i >= 0) {
- 						m -= i;
- 						p += i;
-+						prev_eio = 0;
- 						continue;
- 					}
-+					/* Don't try to write the same data
-+					 * again if we got EIO twice */
-+					if (errno == EIO && prev_eio) {
-+						m = 0;
-+					}
-+					prev_eio = (errno == EIO);
- 					/*
- 					 *	Handle EIO (somebody hung
- 					 *	up our filedescriptor)
--- 
-2.12.2
-
+ #ifndef __linux__	/* BSD-style ioctl needs an argument. */
+ 	int		on = 1;
+ #endif
+@@ -668,8 +669,15 @@ int main(int argc, char **argv)
+ 						if (i >= 0) {
+ 							m -= i;
+ 							p += i;
++							prev_eio = 0;
+ 							continue;
+ 						}
++						/* Don't try to write the same data
++						 * again if we got EIO twice */
++						if (errno == EIO && prev_eio) {
++							m = 0;
++						}
++						prev_eio = (errno == EIO);
+ 						/*
+ 						 *	Handle EIO (somebody hung
+ 						 *	up our filedescriptor)
