@@ -41,7 +41,7 @@ LTTNGUST_libc-musl = ""
 LTTNGUST_riscv64 = ""
 
 LTTNGTOOLS = "lttng-tools"
-LTTNGTOOLS_libc-musl = ""
+LTTNGTOOLS_arc = ""
 LTTNGTOOLS_riscv64 = ""
 
 LTTNGMODULES = "lttng-modules"
