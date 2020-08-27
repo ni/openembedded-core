@@ -35,16 +35,8 @@ SYSTEMTAP = "systemtap"
 SYSTEMTAP_libc-musl = ""
 SYSTEMTAP_nios2 = ""
 
-# lttng-ust uses sched_getcpu() which is not there on for some platforms.
-LTTNGUST = "lttng-ust"
-LTTNGUST_libc-musl = ""
-LTTNGUST_riscv64 = ""
-
 LTTNGTOOLS = "lttng-tools"
 LTTNGTOOLS_arc = ""
-LTTNGTOOLS_riscv64 = ""
-
-LTTNGMODULES = "lttng-modules"
 
 BABELTRACE = "babeltrace"
 BABELTRACE2 = "babeltrace2"
@@ -64,9 +56,7 @@ VALGRIND_linux-gnux32 = ""
 
 RDEPENDS_${PN} = "\
     ${PROFILETOOLS} \
-    ${LTTNGUST} \
     ${LTTNGTOOLS} \
-    ${LTTNGMODULES} \
     ${BABELTRACE} \
     ${BABELTRACE2} \
     ${SYSTEMTAP} \
