@@ -2344,7 +2344,8 @@ def mapping_rename_hook(d):
     runtime_mapping_rename("RRECOMMENDS", pkg, d)
     runtime_mapping_rename("RSUGGESTS", pkg, d)
 
-addtask do_install_source after do_fetch after do_install before do_package
+addtask do_install_source after do_fetch before do_package
+addtask do_install_source after do_install before do_package
 
 python do_install_source () {
     oe.package.do_install_source(d)
