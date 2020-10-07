@@ -12,6 +12,9 @@ Signed-off-by: Ross Burton <ross.burton@intel.com>
 Refreshed for 1.0.2i
 Signed-off-by: Patrick Ohly <patrick.ohly@intel.com>
 
+Refreshed for 1.0.2u
+Signed-off-by: Richard Tollerton <rich.tollerton@ni.com>
+
 ---
  Makefile.org          |  14 +-
  Makefile.org.orig     |  10 +-
@@ -163,7 +166,7 @@ diff --git a/test/Makefile b/test/Makefile
 index 40abd60..78d3788 100644
 --- a/test/Makefile
 +++ b/test/Makefile
-@@ -145,7 +145,7 @@ install:
+@@ -145,7 +145,7 @@
  tags:
  	ctags $(SRC)
  
@@ -172,7 +175,7 @@ index 40abd60..78d3788 100644
  
  apps:
  	@(cd ..; $(MAKE) DIRS=apps all)
-@@ -444,139 +444,139 @@ BUILD_CMD_STATIC=shlib_target=; \
+@@ -448,142 +448,142 @@
  		link_app.$${shlib_target}
  
  $(RSATEST)$(EXE_EXT): $(RSATEST).o $(DLIBCRYPTO)
@@ -346,6 +349,10 @@ index 40abd60..78d3788 100644
  $(FATALERRTEST)$(EXE_EXT): $(FATALERRTEST).o ssltestlib.o $(DLIBSSL) $(DLIBCRYPTO)
  	@target=$(FATALERRTEST); exobj=ssltestlib.o; $(BUILD_CMD)
  
+ $(X509TIMETEST)$(EXE_EXT): $(X509TIMETEST).o
+-	@target=$(X509TIMETEST) $(BUILD_CMD)
++	+@target=$(X509TIMETEST) $(BUILD_CMD)
+ 
  $(SSLV2CONFTEST)$(EXE_EXT): $(SSLV2CONFTEST).o
 -	@target=$(SSLV2CONFTEST) $(BUILD_CMD)
 +	+@target=$(SSLV2CONFTEST) $(BUILD_CMD)
@@ -356,7 +363,7 @@ index 40abd60..78d3788 100644
  
  #$(AESTEST).o: $(AESTEST).c
  #	$(CC) -c $(CFLAGS) -DINTERMEDIATE_VALUE_KAT -DTRACE_KAT_MCT $(AESTEST).c
-@@ -589,7 +589,7 @@ $(DTLSTEST)$(EXE_EXT): $(DTLSTEST).o ssltestlib.o $(DLIBSSL) $(DLIBCRYPTO)
+@@ -596,7 +596,7 @@
  #	fi
  
  dummytest$(EXE_EXT): dummytest.o $(DLIBCRYPTO)
