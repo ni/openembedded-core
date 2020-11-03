@@ -169,11 +169,20 @@ class OpkgPM(OpkgDpkgPM):
         self.pkg_archs = archs
         self.task_name = task_name
 
+
+        if d.getVar('BUILD_IMAGES_FROM_FEEDS'):
+            self.deploy_dir = self.d.getVar("DEPLOY_DIR_IPK")
+        else:
+            self.deploy_dir = oe.path.join(self.d.getVar('WORKDIR'), ipk_repo_workdir)
         self.deploy_dir = oe.path.join(self.d.getVar('WORKDIR'), ipk_repo_workdir)
         self.deploy_lock_file = os.path.join(self.deploy_dir, "deploy.lock")
         self.opkg_cmd = bb.utils.which(os.getenv('PATH'), "opkg")
         self.opkg_args = "--volatile-cache -f %s -t %s -o %s " % (self.config_file, self.d.expand('${T}/ipktemp/') ,target_rootfs)
         self.opkg_args += self.d.getVar("OPKG_ARGS")
+
+        if not d.getVar('BUILD_IMAGES_FROM_FEEDS'):
+            if prepare_index:
+                create_packages_dir(self.d, self.deploy_dir, d.getVar("DEPLOY_DIR_IPK"), "package_write_ipk", filterbydependencies)
 
         if prepare_index:
             create_packages_dir(self.d, self.deploy_dir, d.getVar("DEPLOY_DIR_IPK"), "package_write_ipk", filterbydependencies)
