@@ -14,8 +14,6 @@ PE = "1"
 SRC_URI = "http://downloads.yoctoproject.org/releases/${BPN}/${BPN}-${PV}.tar.gz \
            file://opkg.conf \
            file://0001-opkg_conf-create-opkg.lock-in-run-instead-of-var-run.patch \
-           file://0001-opkg_install_pkg-allow-upgrades-between-packages-wit.patch \
-           file://0002-libsolv_solver_execute_transaction-treat-obsolete-op.patch \
            file://run-ptest \
 "
 
