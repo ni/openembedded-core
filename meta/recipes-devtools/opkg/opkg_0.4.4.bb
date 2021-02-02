@@ -17,6 +17,7 @@ SRC_URI = "http://downloads.yoctoproject.org/releases/${BPN}/${BPN}-${PV}.tar.gz
            file://0001-opkg_install_pkg-allow-upgrades-between-packages-wit.patch \
            file://0002-libsolv_solver_execute_transaction-treat-obsolete-op.patch \
            file://0001-tests-let-the-OS-negotiate-relative-package-dirs.patch \
+           file://sourcedateepoch.patch \
            file://run-ptest \
 "
 
