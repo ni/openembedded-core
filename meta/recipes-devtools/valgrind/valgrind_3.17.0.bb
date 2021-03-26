@@ -41,13 +41,25 @@ SRC_URI = "https://sourceware.org/pub/valgrind/valgrind-${PV}.tar.bz2 \
            file://0001-adjust-path-filter-for-2-memcheck-tests.patch \
            file://s390x_vec_op_t.patch \
            file://0001-memcheck-tests-Fix-timerfd-syscall-test.patch \
-           file://0001-helgrind-Intercept-libc-functions.patch \
+           file://0001-Add-missing-musl.supp.patch \
            "
-SRC_URI[md5sum] = "d1b153f1ab17cf1f311705e7a83ef589"
-SRC_URI[sha256sum] = "c91f3a2f7b02db0f3bc99479861656154d241d2fdb265614ba918cc6720a33ca"
+SRC_URI[md5sum] = "afe11b5572c3121a781433b7c0ab741b"
+SRC_URI[sha256sum] = "ad3aec668e813e40f238995f60796d9590eee64a16dff88421430630e69285a2"
 UPSTREAM_CHECK_REGEX = "valgrind-(?P<pver>\d+(\.\d+)+)\.tar"
 
 COMPATIBLE_HOST = '(i.86|x86_64|arm|aarch64|mips|powerpc|powerpc64).*-linux'
+
+# patch 0001-memcheck-vgtests-remove-fullpath-after-flags.patch removes relative path
+# argument. Change expected stderr files accordingly.
+do_patch_append() {
+    bb.build.exec_func('do_sed_paths', d)
+    
+}
+
+do_sed_paths() {
+    sed -i -e 's|tests/||' ${S}/memcheck/tests/badfree3.stderr.exp
+    sed -i -e 's|tests/||' ${S}/memcheck/tests/varinfo5.stderr.exp
+}
 
 # valgrind supports armv7 and above
 COMPATIBLE_HOST_armv4 = 'null'
@@ -93,7 +105,7 @@ do_configure_prepend () {
 }
 
 do_install_append () {
-    install -m 644 ${B}/default.supp ${D}/${libdir}/valgrind/
+    install -m 644 ${B}/default.supp ${D}/${libexecdir}/valgrind/
     oe_multilib_header valgrind/config.h
 }
 
@@ -108,7 +120,7 @@ VALGRINDARCH_powerpc = "ppc"
 VALGRINDARCH_powerpc64 = "ppc64"
 VALGRINDARCH_powerpc64el = "ppc64le"
 
-INHIBIT_PACKAGE_STRIP_FILES = "${PKGD}${libdir}/valgrind/vgpreload_memcheck-${VALGRINDARCH}-linux.so"
+INHIBIT_PACKAGE_STRIP_FILES = "${PKGD}${libexecdir}/valgrind/vgpreload_memcheck-${VALGRINDARCH}-linux.so"
 
 RDEPENDS_${PN} += "perl"
 
@@ -119,7 +131,9 @@ RRECOMMENDS_${PN} += "${TCLIBC}-dbg"
 RDEPENDS_${PN}-ptest += " bash coreutils file \
    gdb libgomp \
    perl \
-   perl-module-getopt-long perl-module-file-basename perl-module-file-glob \
+   perl-module-file-basename perl-module-file-glob perl-module-getopt-long \
+   perl-module-overloading perl-module-cwd perl-module-ipc-open3 \
+   perl-module-carp perl-module-symbol \
    procps sed ${PN}-dbg"
 RDEPENDS_${PN}-ptest_append_libc-glibc = " glibc-utils"
 
@@ -206,7 +220,23 @@ do_install_ptest() {
     sed -i s:\.\./\.\./callgrind/callgrind_annotate:${bindir}/callgrind_annotate: ${D}${PTEST_PATH}/callgrind/tests/ann1.vgtest
     sed -i s:\.\./\.\./callgrind/callgrind_annotate:${bindir}/callgrind_annotate: ${D}${PTEST_PATH}/callgrind/tests/ann2.vgtest
 
+    # point the expanded @abs_top_builddir@ of the host to PTEST_PATH
+    sed -i s:${S}:${PTEST_PATH}:g \
+        ${D}${PTEST_PATH}/memcheck/tests/linux/debuginfod-check.vgtest
+
     # handle multilib
     sed -i s:@libdir@:${libdir}:g ${D}${PTEST_PATH}/run-ptest
+    sed -i s:@libexecdir@:${libexecdir}:g ${D}${PTEST_PATH}/run-ptest
     sed -i s:@bindir@:${bindir}:g ${D}${PTEST_PATH}/run-ptest
 }
+
+# avoid stripping some generated binaries otherwise some of the tests will fail
+# run-strip-reloc.sh, run-strip-strmerge.sh and so on will fail
+INHIBIT_PACKAGE_STRIP_FILES += "\
+    ${PKGD}${PTEST_PATH}/none/tests/tls \
+    ${PKGD}${PTEST_PATH}/none/tests/tls.so \
+    ${PKGD}${PTEST_PATH}/none/tests/tls2.so \
+    ${PKGD}${PTEST_PATH}/helgrind/tests/tc09_bad_unlock \
+    ${PKGD}${PTEST_PATH}/memcheck/tests/manuel1 \
+    ${PKGD}${PTEST_PATH}/drd/tests/pth_detached3 \
+"
