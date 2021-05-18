@@ -1,4 +1,6 @@
 SUMMARY = "Additional utilities for the opkg package manager"
+SUMMARY_opkg-utils-shell-tools = "Additional utilities for the opkg package manager (shell scripts)"
+SUMMARY_opkg-utils-python-tools = "Additional utilities for the opkg package manager (python scripts)"
 SUMMARY_update-alternatives-opkg = "Utility for managing the alternatives system"
 SECTION = "base"
 HOMEPAGE = "http://git.yoctoproject.org/cgit/cgit.cgi/opkg-utils"
@@ -17,7 +19,13 @@ SRC_URI[sha256sum] = "046517600fb0aed6c4645edefe02281f4fa2f1c02f71596152d9317245
 
 TARGET_CC_ARCH += "${LDFLAGS}"
 
-RDEPENDS_${PN} += "bash"
+SUBPACKAGES = "opkg-utils-shell-tools ${@bb.utils.contains('PACKAGECONFIG', 'python', 'opkg-utils-python-tools', '', d)}"
+
+PACKAGES =+ "${SUBPACKAGES}"
+
+# main package is a metapackage that depends on all the subpackages
+ALLOW_EMPTY_${PN} = "1"
+RDEPENDS_${PN} += "${SUBPACKAGES}"
 
 inherit perlnative
 
@@ -28,6 +36,37 @@ PYTHONRDEPS_class-native = ""
 PACKAGECONFIG = "python update-alternatives"
 PACKAGECONFIG[python] = ",,,${PYTHONRDEPS}"
 PACKAGECONFIG[update-alternatives] = ",,,"
+
+FILES_opkg-utils-shell-tools = "\
+    ${bindir}/opkg-build \
+    ${mandir}/man1/opkg-build.1 \
+    ${bindir}/opkg-buildpackage \
+    ${bindir}/opkg-diff \
+    ${bindir}/opkg-extract-file \
+    ${bindir}/opkg-feed \
+    ${bindir}/opkg-unbuild \
+"
+
+FILES_opkg-utils-python-tools = "\
+    ${bindir}/opkg-compare-indexes \
+    ${bindir}/opkg-graph-deps \
+    ${bindir}/opkg-list-fields \
+    ${bindir}/opkg-make-index \
+    ${bindir}/opkg-show-deps \
+    ${bindir}/opkg-update-index \
+    ${bindir}/arfile.py \
+    ${bindir}/opkg.py \
+"
+
+RDEPENDS_opkg-utils-shell-tools += "bash"
+
+# python tools depend on shell tools because opkg-compare-indexes needs opkg-diff
+RDEPENDS_opkg-utils-python-tools += "${PYTHONRDEPS} opkg-utils-shell-tools"
+
+RRECOMMENDS_${PN}_class-native = ""
+RRECOMMENDS_${PN}_class-nativesdk = ""
+RDEPENDS_${PN}_class-native = ""
+RDEPENDS_${PN}_class-nativesdk = ""
 
 do_install() {
 	oe_runmake PREFIX=${prefix} DESTDIR=${D} install
@@ -48,7 +87,7 @@ do_install_append_class-target() {
 
 # These are empty and will pull python3-dev into images where it wouldn't
 # have been otherwise, so don't generate them.
-PACKAGES_remove = "${PN}-dev ${PN}-staticdev"
+PACKAGES_remove = "${PN}-dbg ${PN}-dev ${PN}-staticdev"
 
 PACKAGES =+ "update-alternatives-opkg"
 FILES_update-alternatives-opkg = "${bindir}/update-alternatives"
