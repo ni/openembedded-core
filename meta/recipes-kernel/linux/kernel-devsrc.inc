@@ -321,7 +321,7 @@ do_install[lockfiles] = "${TMPDIR}/kernel-scripts.lock"
 FILES_${PN} = "${KERNEL_BUILD_ROOT} ${KERNEL_SRC_PATH}"
 FILES_${PN}-dbg += "${KERNEL_BUILD_ROOT}*/build/scripts/*/.debug/*"
 
-RDEPENDS_${PN} = "bc python3 flex bison ${TCLIBC}-utils"
+RDEPENDS_${PN} = "bc flex bison ${TCLIBC}-utils"
 # 4.15+ needs these next two RDEPENDS
 RDEPENDS_${PN} += "openssl-dev util-linux"
 # and x86 needs a bit more for 4.15+
