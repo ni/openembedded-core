@@ -15,9 +15,9 @@ inherit module-base
 # We need the kernel to be staged (unpacked, patched and configured) before
 # we can grab the source and make the source package. We also need the bits from
 # ${B} not to change while we install, so virtual/kernel must finish do_compile.
-#do_install[depends] += "${KERNEL_DEPENDENCY}:do_shared_workdir"
+do_install[depends] += "${KERNEL_DEPENDENCY}:do_shared_workdir"
 # Need the source, not just the output of populate_sysroot
-#do_install[depends] += "${KERNEL_DEPENDENCY}:do_install"
+do_install[depends] += "${KERNEL_DEPENDENCY}:do_install"
 
 do_configure[depends] = "${KERNEL_DEPENDENCY}:do_deploy"
 
