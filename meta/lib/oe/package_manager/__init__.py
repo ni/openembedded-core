@@ -88,8 +88,15 @@ def opkg_query(cmd_output):
 
     return output
 
-def failed_postinsts_abort(pkgs, log_path):
-    bb.fatal("""Postinstall scriptlets of %s have failed. If the intention is to defer them to first boot,
+def failed_postinsts_handler(d, pkgs, log_path):
+    # Abort on post-installation failures only if BUILD_IMAGES_FROM_FEEDS
+    # is not enabled. Post-installation failures are expected in cases
+    # where utilities required to run post-install scripts do not get
+    # installed to the native rootfs because package_write_ipk
+    # dependencies are nulled when building images from feed. These
+    # scripts will be run on first boot.
+    if not d.getVar('BUILD_IMAGES_FROM_FEEDS'):
+        bb.fatal("""Postinstall scriptlets of %s have failed. If the intention is to defer them to first boot,
 then please place them into pkg_postinst_ontarget_${PN} ().
 Deferring to first boot via 'exit 1' is no longer supported.
 Details of the failure are in %s.""" %(pkgs, log_path))
@@ -256,7 +263,10 @@ class PackageManager(object, metaclass=ABCMeta):
                                 % (script, self.d.getVar('T'), self.d.getVar('BB_CURRENTTASK')))
                         self._postpone_to_first_boot(script_full)
                     else:
-                        bb.fatal("The postinstall intercept hook '%s' failed, details in %s/log.do_%s" % (script, self.d.getVar('T'), self.d.getVar('BB_CURRENTTASK')))
+                        if not self.d.getVar('BUILD_IMAGES_FROM_FEEDS'):
+                            bb.fatal("The postinstall intercept hook '%s' failed, details in %s/log.do_%s" % (script, self.d.getVar('T'), self.d.getVar('BB_CURRENTTASK')))
+                        else:
+                            bb.note("The postinstall intercept hook '%s' failed, details in %s/log.do_%s" % (script, self.d.getVar('T'), self.d.getVar('BB_CURRENTTASK')))
 
     @abstractmethod
     def update(self):

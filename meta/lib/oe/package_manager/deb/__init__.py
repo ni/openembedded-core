@@ -259,7 +259,7 @@ class DpkgPM(OpkgDpkgPM):
                         bb.warn("%s for package %s failed with %d:\n%s" %
                                 (control_script.name, pkg_name, e.returncode,
                                     e.output.decode("utf-8")))
-                        failed_postinsts_abort([pkg_name], self.d.expand("${T}/log.do_${BB_CURRENTTASK}"))
+                        failed_postinsts_handler(self.d, [pkg_name], self.d.expand("${T}/log.do_${BB_CURRENTTASK}"))
 
     def update(self):
         os.environ['APT_CONFIG'] = self.apt_conf_file
