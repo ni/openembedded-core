@@ -20,7 +20,6 @@ SRC_URI = "${SAVANNAH_GNU_MIRROR}/sysvinit/sysvinit-${PV}.tar.xz \
            file://rcS \
            file://bootlogd.init \
            file://01_bootlogd \
-           file://bootlogd-xemacps.patch \
            file://bootlogd.c-don-t-keep-writing-to-broken-consoles.patch \
            "
 SRC_URI[sha256sum] = "b05c3677bb698afe64c997968b00c49b2a9bd320ce963523230ee7ea41197757"
