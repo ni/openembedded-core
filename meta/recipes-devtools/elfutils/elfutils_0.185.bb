@@ -49,11 +49,12 @@ PACKAGECONFIG[zstd] = "--with-zstd,--without-zstd,zstd"
 PACKAGECONFIG[libdebuginfod] = "--enable-libdebuginfod,--disable-libdebuginfod,curl"
 PACKAGECONFIG[debuginfod] = "--enable-debuginfod,--disable-debuginfod,libarchive sqlite3 libmicrohttpd"
 
-RDEPENDS_${PN}-ptest += "libasm libelf bash make coreutils ${PN}-binutils iproute2-ss bsdtar"
+RDEPENDS_${PN}-ptest += "libasm libelf bash make coreutils ${PN}-binutils iproute2-ss bsdtar gcc-symlinks binutils-symlinks libgcc-dev"
 
 EXTRA_OECONF_append_class-target = " --disable-tests-rpath"
 
-RDEPENDS_${PN}-ptest_append_libc-glibc = " glibc-utils"
+RDEPENDS_${PN}-ptest_append_libc-glibc = " glibc-utils glibc-dbg glibc-dev"
+INSANE_SKIP_${PN}-ptest = "debug-deps dev-deps"
 
 do_compile_ptest() {
 	cd ${B}/tests
