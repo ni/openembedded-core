@@ -1347,7 +1347,7 @@ python () {
     for i in issues:
         package_qa_handle_error("pkgvarcheck", "%s: Variable %s is set as not being package specific, please fix this." % (d.getVar("FILE"), i), d)
 
-    if 'native-last' not in (d.getVar('INSANE_SKIP') or "").split():
+    if 'native-last' not in (d.getVar(d.expand('INSANE_SKIP_${PN}')) or "").split():
         for native_class in ['native', 'nativesdk']:
             if bb.data.inherits_class(native_class, d):
 
