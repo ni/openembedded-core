@@ -12,7 +12,7 @@ LIC_FILES_CHKSUM = "file://OvmfPkg/License.txt;md5=343dc88e82ff33d042074f62050c3
 PACKAGECONFIG ??= ""
 PACKAGECONFIG[secureboot] = ",,,"
 
-SRC_URI = "git://github.com/tianocore/edk2.git;branch=master \
+SRC_URI = "git://github.com/tianocore/edk2.git;branch=master;protocol=https \
 	file://0001-ia32-Dont-use-pie.patch \
 	file://0002-ovmf-update-path-to-native-BaseTools.patch \
 	file://0003-BaseTools-makefile-adjust-to-build-in-under-bitbake.patch \

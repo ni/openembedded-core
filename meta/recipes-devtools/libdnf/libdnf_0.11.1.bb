@@ -2,7 +2,7 @@ SUMMARY = "Library providing simplified C and Python API to libsolv"
 LICENSE = "LGPLv2.1"
 LIC_FILES_CHKSUM = "file://COPYING;md5=4fbd65380cdd255951079008b364516c"
 
-SRC_URI = "git://github.com/rpm-software-management/libdnf \
+SRC_URI = "git://github.com/rpm-software-management/libdnf;protocol=https \
            file://0001-FindGtkDoc.cmake-drop-the-requirement-for-GTKDOC_SCA.patch \
            file://0002-Prefix-sysroot-path-to-introspection-tools-path.patch \
            file://0003-Set-the-library-installation-directory-correctly.patch \

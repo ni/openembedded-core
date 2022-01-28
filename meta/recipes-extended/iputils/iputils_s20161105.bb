@@ -13,7 +13,7 @@ LIC_FILES_CHKSUM = "file://ping.c;beginline=1;endline=35;md5=f9ceb201733e9a6cf8f
 
 DEPENDS = "gnutls libcap libgcrypt"
 
-SRC_URI = "git://github.com/iputils/iputils \
+SRC_URI = "git://github.com/iputils/iputils;protocol=https \
            file://0001-Fix-build-on-MUSL.patch \
            "
 S = "${WORKDIR}/git"

@@ -15,7 +15,7 @@ PV = "1.0.5+git${SRCPV}"
 
 SRCREV = "dfa2f313524aff9243c4d8ce1bace73786478356"
 
-SRC_URI = "git://github.com/thkukuk/libnsl \
+SRC_URI = "git://github.com/thkukuk/libnsl;protocol=https \
            file://0001-include-sys-cdefs.h-explicitly.patch \
            file://0002-Define-glibc-specific-macros.patch \
            file://0001-nis_call.c-Include-stdint.h-for-uintptr_t-definition.patch \

@@ -23,7 +23,7 @@ CFLAGS_append_powerpc64 = " -D__SANE_USERSPACE_TYPES__"
 CFLAGS_append_mipsarchn64 = " -D__SANE_USERSPACE_TYPES__"
 SRCREV = "731cd34e682d297b207668be8b1d15320a9ac1b1"
 
-SRC_URI = "git://github.com/linux-test-project/ltp.git \
+SRC_URI = "git://github.com/linux-test-project/ltp.git;protocol=https \
            file://0001-configure-add-knob-to-control-numa-support.patch \
            file://0001-configure-Fix-default-value-of-without-numa-switch-i.patch \
            file://0003-Add-knob-to-control-tirpc-support.patch \

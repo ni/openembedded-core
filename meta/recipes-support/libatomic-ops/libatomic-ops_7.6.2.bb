@@ -10,7 +10,7 @@ PV .= "+git${SRCPV}"
 SRCBRANCH ?= "release-7_6"
 
 SRCREV = "5ae4b4aeea2baf13752d07e3038c47f70f06dcac"
-SRC_URI = "git://github.com/ivmai/libatomic_ops;branch=${SRCBRANCH}"
+SRC_URI = "git://github.com/ivmai/libatomic_ops;branch=${SRCBRANCH};protocol=https"
 
 S = "${WORKDIR}/git"
 
