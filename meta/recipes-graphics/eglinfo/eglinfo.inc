@@ -6,7 +6,7 @@ LIC_FILES_CHKSUM = "file://LICENSE;md5=8d4f33bc3add976f7dfae85dab66f03c"
 
 DEPENDS = "virtual/egl"
 
-SRC_URI = "git://github.com/dv1/eglinfo.git;branch=master \
+SRC_URI = "git://github.com/dv1/eglinfo.git;branch=master;protocol=https \
            file://0001-Add-STAGING_INCDIR-to-searchpath-for-egl-headers.patch \
           "
 SRCREV = "4b317648ec6cf39556a9e5d8078f605bc0edd5de"

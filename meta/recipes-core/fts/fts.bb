@@ -10,7 +10,7 @@ SECTION = "libs"
 SRCREV = "944333aed9dc24cfa76cc64bfe70c75d25652753"
 PV = "1.2+git${SRCPV}"
 
-SRC_URI = "git://github.com/voidlinux/musl-fts \
+SRC_URI = "git://github.com/voidlinux/musl-fts;protocol=https \
 "
 S = "${WORKDIR}/git"
 

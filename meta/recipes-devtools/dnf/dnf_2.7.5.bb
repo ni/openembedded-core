@@ -4,7 +4,7 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=b234ee4d69f5fce4486a80fdaf4a4263 \
                     file://PACKAGE-LICENSING;md5=bfc29916e11321be06924c4fb096fdcc \
                    "
 
-SRC_URI = "git://github.com/rpm-software-management/dnf.git \
+SRC_URI = "git://github.com/rpm-software-management/dnf.git;protocol=https \
            file://0001-Corretly-install-tmpfiles.d-configuration.patch \
            file://0001-Do-not-hardcode-etc-and-systemd-unit-directories.patch \
            file://0005-Do-not-prepend-installroot-to-logdir.patch \

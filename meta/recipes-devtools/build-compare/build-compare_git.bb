@@ -5,7 +5,7 @@ HOMEPAGE = "https://github.com/openSUSE/build-compare"
 LICENSE = "GPLv2"
 LIC_FILES_CHKSUM = "file://COPYING;md5=751419260aa954499f7abaabaa882bbe"
 
-SRC_URI = "git://github.com/openSUSE/build-compare.git \
+SRC_URI = "git://github.com/openSUSE/build-compare.git;protocol=https \
            file://Rename-rpm-check.sh-to-pkg-diff.sh.patch;striplevel=1 \
            file://Ignore-DWARF-sections.patch;striplevel=1 \
            file://0001-Add-support-for-deb-and-ipk-packaging.patch \

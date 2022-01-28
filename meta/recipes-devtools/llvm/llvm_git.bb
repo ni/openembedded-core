@@ -23,7 +23,7 @@ SRCREV = "089d4c0c490687db6c75f1d074e99c4d42936a50"
 PV = "6.0"
 BRANCH = "release_60"
 PATCH_VERSION = "0"
-SRC_URI = "git://github.com/llvm-mirror/llvm.git;branch=${BRANCH};protocol=http \
+SRC_URI = "git://github.com/llvm-mirror/llvm.git;branch=${BRANCH};protocol=http;protocol=https \
            file://0001-llvm-TargetLibraryInfo-Undefine-libc-functions-if-th.patch \
            file://0002-llvm-allow-env-override-of-exe-path.patch \
            file://0001-Disable-generating-a-native-llvm-config.patch \
