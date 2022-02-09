@@ -19,6 +19,7 @@ SRC_URI = "https://mesa.freedesktop.org/archive/mesa-${PV}.tar.xz \
            file://0002-meson.build-make-TLS-ELF-optional.patch \
            file://0001-meson-misdetects-64bit-atomics-on-mips-clang.patch \
            file://0001-futex.h-Define-__NR_futex-if-it-does-not-exist.patch \
+           file://0001-gallium-dri-Make-YUV-formats-we-re-going-to-emulate-.patch \
            "
 
 SRC_URI[sha256sum] = "565c6f4bd2d5747b919454fc1d439963024fc78ca56fd05158c3b2cde2f6912b"
@@ -252,7 +253,7 @@ python mesa_populate_packages() {
     import re
     dri_drivers_root = oe.path.join(d.getVar('PKGD'), d.getVar('libdir'), "dri")
     if os.path.isdir(dri_drivers_root):
-        dri_pkgs = os.listdir(dri_drivers_root)
+        dri_pkgs = sorted(os.listdir(dri_drivers_root))
         lib_name = d.expand("${MLPREFIX}mesa-megadriver")
         for p in dri_pkgs:
             m = re.match(r'^(.*)_dri\.so$', p)

@@ -13,17 +13,17 @@ KBRANCH_qemux86  ?= "v5.10/standard/base"
 KBRANCH_qemux86-64 ?= "v5.10/standard/base"
 KBRANCH_qemumips64 ?= "v5.10/standard/mti-malta64"
 
-SRCREV_machine_qemuarm ?= "c74da440f36f7073b1e99f42cb363031bb0c38ca"
-SRCREV_machine_qemuarm64 ?= "e4e52d0a19fba26538218d78c70e54319ae00ca3"
-SRCREV_machine_qemumips ?= "60118f08d49cd825d17f11b078d5848eb5bb7e6d"
-SRCREV_machine_qemuppc ?= "eb3d2abf3d5aab1814d53767193770c282552774"
-SRCREV_machine_qemuriscv64 ?= "0b44b705c4f7d5c83e562dd7036cb5188d622285"
-SRCREV_machine_qemuriscv32 ?= "0b44b705c4f7d5c83e562dd7036cb5188d622285"
-SRCREV_machine_qemux86 ?= "0b44b705c4f7d5c83e562dd7036cb5188d622285"
-SRCREV_machine_qemux86-64 ?= "0b44b705c4f7d5c83e562dd7036cb5188d622285"
-SRCREV_machine_qemumips64 ?= "643c332e487cfa1557d14050d6e1148d1c5d75da"
-SRCREV_machine ?= "0b44b705c4f7d5c83e562dd7036cb5188d622285"
-SRCREV_meta ?= "3f38ad49cf38519dc4492a3f802b743fde7b467e"
+SRCREV_machine_qemuarm ?= "fb570663823bd492e4c8d4339be825bda4210dc6"
+SRCREV_machine_qemuarm64 ?= "5a52b700c1693a95b8efa54cb65bec7807a75cd2"
+SRCREV_machine_qemumips ?= "8eb8a801f5f4764c362aefd5e97e704755cf740b"
+SRCREV_machine_qemuppc ?= "21b014e385a6b54a2fd7d667a1b556c69cda77de"
+SRCREV_machine_qemuriscv64 ?= "77c8d144b066f69e009ce2ee540a593b11eb736a"
+SRCREV_machine_qemuriscv32 ?= "77c8d144b066f69e009ce2ee540a593b11eb736a"
+SRCREV_machine_qemux86 ?= "77c8d144b066f69e009ce2ee540a593b11eb736a"
+SRCREV_machine_qemux86-64 ?= "77c8d144b066f69e009ce2ee540a593b11eb736a"
+SRCREV_machine_qemumips64 ?= "5468343e50389dba73b5d441289d5094bd0dc9f0"
+SRCREV_machine ?= "77c8d144b066f69e009ce2ee540a593b11eb736a"
+SRCREV_meta ?= "de35f8006d0f932924752ddda94dd24e2da67fbc"
 
 # remap qemuarm to qemuarma15 for the 5.8 kernel
 # KMACHINE_qemuarm ?= "qemuarma15"
@@ -32,11 +32,11 @@ SRC_URI = "git://git.yoctoproject.org/linux-yocto.git;name=machine;branch=${KBRA
            git://git.yoctoproject.org/yocto-kernel-cache;type=kmeta;name=meta;branch=yocto-5.10;destsuffix=${KMETA}"
 
 LIC_FILES_CHKSUM = "file://COPYING;md5=6bc538ed5bd9a7fc9398086aedcd7e46"
-LINUX_VERSION ?= "5.10.53"
+LINUX_VERSION ?= "5.10.91"
 
 DEPENDS += "${@bb.utils.contains('ARCH', 'x86', 'elfutils-native', '', d)}"
 DEPENDS += "openssl-native util-linux-native"
-DEPENDS += "gmp-native"
+DEPENDS += "gmp-native libmpc-native"
 
 PV = "${LINUX_VERSION}+git${SRCPV}"
 

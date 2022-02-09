@@ -24,7 +24,7 @@ HOMEPAGE = "http://www.rpm.org"
 LICENSE = "GPL-2.0"
 LIC_FILES_CHKSUM = "file://COPYING;md5=c4eec0c20c6034b9407a09945b48a43f"
 
-SRC_URI = "git://github.com/rpm-software-management/rpm;branch=rpm-4.16.x \
+SRC_URI = "git://github.com/rpm-software-management/rpm;branch=rpm-4.16.x;protocol=https \
            file://environment.d-rpm.sh \
            file://0001-Do-not-add-an-unsatisfiable-dependency-when-building.patch \
            file://0001-Do-not-read-config-files-from-HOME.patch \
@@ -40,6 +40,10 @@ SRC_URI = "git://github.com/rpm-software-management/rpm;branch=rpm-4.16.x \
            file://0016-rpmscript.c-change-logging-level-around-scriptlets-t.patch \
            file://0001-lib-transaction.c-fix-file-conflicts-for-MIPS64-N32.patch \
            file://0001-tools-Add-error.h-for-non-glibc-case.patch \
+           file://0001-build-pack.c-do-not-insert-payloadflags-into-.rpm-me.patch \
+           file://0001-CVE-2021-3521.patch \
+           file://0002-CVE-2021-3521.patch \
+           file://0003-CVE-2021-3521.patch \
            "
 
 PE = "1"
@@ -58,7 +62,8 @@ AUTOTOOLS_AUXDIR = "${S}/build-aux"
 # OE-core patches autoreconf to additionally run gnu-configize, which fails with this recipe
 EXTRA_AUTORECONF_append = " --exclude=gnu-configize"
 
-EXTRA_OECONF_append = " --without-lua --enable-python --with-crypto=libgcrypt"
+# Vendor is detected differently on x86 and aarch64 hosts and can feed into target packages
+EXTRA_OECONF_append = " --without-lua --enable-python --with-crypto=libgcrypt --with-vendor=pc"
 EXTRA_OECONF_append_libc-musl = " --disable-nls --disable-openmp"
 
 # --sysconfdir prevents rpm from attempting to access machine-specific configuration in sysroot/etc; we need to have it in rootfs
