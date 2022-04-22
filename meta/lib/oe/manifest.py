@@ -16,6 +16,7 @@ class Manifest(object, metaclass=ABCMeta):
     PKG_TYPE_MULTILIB = "mlp"
     PKG_TYPE_LANGUAGE = "lgp"
     PKG_TYPE_ATTEMPT_ONLY = "aop"
+    PKG_TYPE_NODEPS = "ndp"
 
     MANIFEST_TYPE_IMAGE = "image"
     MANIFEST_TYPE_SDK_HOST = "sdk_host"
@@ -24,7 +25,7 @@ class Manifest(object, metaclass=ABCMeta):
     var_maps = {
         MANIFEST_TYPE_IMAGE: {
             "PACKAGE_INSTALL": PKG_TYPE_MUST_INSTALL,
-            "PACKAGE_INSTALL_NODEPS": PKG_TYPE_MUST_INSTALL,
+            "PACKAGE_INSTALL_NODEPS": PKG_TYPE_NODEPS,
             "PACKAGE_INSTALL_ATTEMPTONLY": PKG_TYPE_ATTEMPT_ONLY,
             "LINGUAS_INSTALL": PKG_TYPE_LANGUAGE
         },
@@ -42,7 +43,8 @@ class Manifest(object, metaclass=ABCMeta):
         PKG_TYPE_LANGUAGE,
         PKG_TYPE_MUST_INSTALL,
         PKG_TYPE_ATTEMPT_ONLY,
-        PKG_TYPE_MULTILIB
+        PKG_TYPE_MULTILIB,
+        PKG_TYPE_NODEPS
     ]
 
     initial_manifest_file_header = \
@@ -55,7 +57,8 @@ class Manifest(object, metaclass=ABCMeta):
         "#      'mip' = must install package\n" \
         "#      'aop' = attempt only package\n" \
         "#      'mlp' = multilib package\n" \
-        "#      'lgp' = language package\n\n"
+        "#      'lgp' = language package\n" \
+        "#      'ndp' = external packages\n\n"
 
     def __init__(self, d, manifest_dir=None, manifest_type=MANIFEST_TYPE_IMAGE):
         self.d = d
@@ -151,11 +154,12 @@ class Manifest(object, metaclass=ABCMeta):
         with open(self.initial_manifest) as manifest:
             for line in manifest.read().split('\n'):
                 comment = re.match("^#.*", line)
-                pattern = "^(%s|%s|%s|%s),(.*)$" % \
+                pattern = "^(%s|%s|%s|%s|%s),(.*)$" % \
                           (self.PKG_TYPE_MUST_INSTALL,
                            self.PKG_TYPE_ATTEMPT_ONLY,
                            self.PKG_TYPE_MULTILIB,
-                           self.PKG_TYPE_LANGUAGE)
+                           self.PKG_TYPE_LANGUAGE,
+                           self.PKG_TYPE_NODEPS)
                 pkg = re.match(pattern, line)
 
                 if comment is not None:
