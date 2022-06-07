@@ -1,0 +1,126 @@
+From 427382ccfe910542455c27fc19bdc27c03fba3db Mon Sep 17 00:00:00 2001
+From: Joseph Myers <joseph@codesourcery.com>
+Date: Sat, 7 Oct 2017 13:42:41 +0200
+Subject: [PATCH] Fix rpcgen buffer overrun (bug 20790).
+
+Building with GCC 7 produces an error building rpcgen:
+
+rpc_parse.c: In function 'get_prog_declaration':
+rpc_parse.c:543:25: error: may write a terminating nul past the end of the destination [-Werror=format-length=]
+     sprintf (name, "%s%d", ARGNAME, num); /* default name of argument */
+                     ~~~~^
+rpc_parse.c:543:5: note: format output between 5 and 14 bytes into a destination of size 10
+     sprintf (name, "%s%d", ARGNAME, num); /* default name of argument */
+     ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+That buffer overrun is for the case where the .x file declares a
+program with a million arguments.  The strcpy two lines above can
+generate a buffer overrun much more simply for a long argument name.
+
+The limit on length of line read by rpcgen (MAXLINESIZE == 1024)
+provides a bound on the buffer size needed, so this patch just changes
+the buffer size to MAXLINESIZE to avoid both possible buffer
+overruns.  A testcase is added that rpcgen does not crash with a
+500-character argument name, where it previously crashed.
+
+It would not at all surprise me if there are many other ways of
+crashing rpcgen with either valid or invalid input; fuzz testing would
+likely find various such bugs, though I don't think they are that
+important to fix (rpcgen is not that likely to be used with untrusted
+.x files as input).  (As well as fuzz-findable bugs there are probably
+also issues when various int variables get overflowed on very large
+input.)  The test infrastructure for rpcgen-not-crashing tests would
+need extending if tests are to be added for cases where rpcgen should
+produce an error, as opposed to cases where it should succeed.
+
+Tested for x86_64 and x86.
+
+	[BZ #20790]
+	* sunrpc/rpc_parse.c (get_prog_declaration): Increase buffer size
+	to MAXLINESIZE.
+	* sunrpc/bug20790.x: New file.
+	* sunrpc/Makefile [$(run-built-tests) = yes] (rpcgen-tests): New
+	variable.
+	[$(run-built-tests) = yes] (tests-special): Add $(rpcgen-tests).
+	[$(run-built-tests) = yes] ($(rpcgen-tests)): New rule.
+
+(cherry picked from commit 5874510faaf3cbd0bb112aaacab9f225002beed1)
+(cherry picked from commit 7fca94796b67a8ca3730da255e64ee95a818f231)
+
+Upstream-Status: Accepted
+---
+ ChangeLog          | 11 +++++++++++
+ sunrpc/Makefile    | 11 +++++++++++
+ sunrpc/bug20790.x  |  1 +
+ sunrpc/rpc_parse.c |  2 +-
+ 4 files changed, 24 insertions(+), 1 deletion(-)
+ create mode 100644 sunrpc/bug20790.x
+
+diff --git a/ChangeLog b/ChangeLog
+index 84ae7a7af8d9535c0fb63d8dec7926f0bd367f35..768620968a47e07cb4d735d492c969f06c14a9d8 100644
+--- a/ChangeLog
++++ b/ChangeLog
+@@ -1,3 +1,14 @@
++2016-11-08  Joseph Myers  <joseph@codesourcery.com>
++
++	[BZ #20790]
++	* sunrpc/rpc_parse.c (get_prog_declaration): Increase buffer size
++	to MAXLINESIZE.
++	* sunrpc/bug20790.x: New file.
++	* sunrpc/Makefile [$(run-built-tests) = yes] (rpcgen-tests): New
++	variable.
++	[$(run-built-tests) = yes] (tests-special): Add $(rpcgen-tests).
++	[$(run-built-tests) = yes] ($(rpcgen-tests)): New rule.
++
+ 2016-08-04  Carlos O'Donell  <carlos@redhat.com>
+ 
+ 	* po/de.po: Update from Translation Project.
+diff --git a/sunrpc/Makefile b/sunrpc/Makefile
+index 789ef423e517d042ea3192a967c49b057ecdd8e8..99e5c3ccf8e6a0d069548234cda5dcec93f99866 100644
+--- a/sunrpc/Makefile
++++ b/sunrpc/Makefile
+@@ -103,6 +103,11 @@ ifeq ($(have-thread-library),yes)
+ xtests += thrsvc
+ endif
+ 
++ifeq ($(run-built-tests),yes)
++rpcgen-tests := $(objpfx)bug20790.out
++tests-special += $(rpcgen-tests)
++endif
++
+ headers += $(rpcsvc:%.x=rpcsvc/%.h)
+ extra-libs := librpcsvc
+ extra-libs-others := librpcsvc # Make it in `others' pass, not `lib' pass.
+@@ -225,3 +230,9 @@ endif
+ endif
+ 
+ $(objpfx)thrsvc: $(common-objpfx)linkobj/libc.so $(shared-thread-library)
++
++ifeq ($(run-built-tests),yes)
++$(rpcgen-tests): $(objpfx)%.out: %.x $(objpfx)rpcgen
++	$(built-program-cmd) -c $< -o $@; \
++	$(evaluate-test)
++endif
+diff --git a/sunrpc/bug20790.x b/sunrpc/bug20790.x
+new file mode 100644
+index 0000000000000000000000000000000000000000..a00c9b3830cd0d2787f38d36966e7ed03ed70486
+--- /dev/null
++++ b/sunrpc/bug20790.x
+@@ -0,0 +1 @@
++program TPROG { version TVERS { int FUNC(int aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa) = 1; } = 1; } = 1;
+diff --git a/sunrpc/rpc_parse.c b/sunrpc/rpc_parse.c
+index 1a1df6d8c22582bdfc0e88b9e7fcfcec986b754e..505a6554cfa32527806d28fae769748c913b4f1c 100644
+--- a/sunrpc/rpc_parse.c
++++ b/sunrpc/rpc_parse.c
+@@ -521,7 +521,7 @@ static void
+ get_prog_declaration (declaration * dec, defkind dkind, int num /* arg number */ )
+ {
+   token tok;
+-  char name[10];		/* argument name */
++  char name[MAXLINESIZE];		/* argument name */
+ 
+   if (dkind == DEF_PROGRAM)
+     {
+-- 
+2.11.0
+
