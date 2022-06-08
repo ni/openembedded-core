@@ -1,0 +1,28 @@
+From 3ef94f1c6469d9ad77ec69867a5e62539a430128 Mon Sep 17 00:00:00 2001
+From: Chaitanya Vadrevu <chaitanya.vadrevu@ni.com>
+Date: Wed, 8 Jun 2022 14:06:20 -0500
+Subject: [PATCH] aclocal.m4: Set GLIBC_AUTOCONF_VERSION to 2.71
+
+hardknott uses autoconf 2.71 so set GLIBC_AUTOCONF_VERSION to that.
+
+Signed-off-by: Chaitanya Vadrevu <chaitanya.vadrevu@ni.com>
+---
+ aclocal.m4 | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/aclocal.m4 b/aclocal.m4
+index 3d64f7773d..39d0bc39bd 100644
+--- a/aclocal.m4
++++ b/aclocal.m4
+@@ -2,7 +2,7 @@ dnl We require that everyone use exactly the same Autoconf version so that
+ dnl the internal functions defined and used by the main configure script
+ dnl match those expected by the fragments.  When changing this version,
+ dnl install.texi also needs to be updated.
+-m4_define([GLIBC_AUTOCONF_VERSION], [2.69])
++m4_define([GLIBC_AUTOCONF_VERSION], [2.71])
+ m4_if(m4_defn([AC_AUTOCONF_VERSION]), GLIBC_AUTOCONF_VERSION, [],
+       [m4_fatal(m4_flatten(
+ Exactly version GLIBC_AUTOCONF_VERSION of Autoconf is required but you have
+-- 
+2.34.1
+
