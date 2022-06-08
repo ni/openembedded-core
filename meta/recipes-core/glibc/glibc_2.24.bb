@@ -40,6 +40,7 @@ SRC_URI = "${GLIBC_GIT_URI};branch=${SRCBRANCH};name=glibc \
            file://0027-arm-mark-__startcontext-as-.cantunwind-bug-20435.patch \
            file://0028-Fix-rpcgen-buffer-overrun-bug-20790.patch \
            file://0029-Fix-nss_nisplus-build-with-mainline-GCC-bug-20978.patch \
+           file://0030-aclocal.m4-Set-GLIBC_AUTOCONF_VERSION-to-2.71.patch \
            file://0001-Avoid-.symver-on-common-symbols-BZ-21666.patch \
            file://0001-Fix-warnings-from-latest-GCC.patch \
 "
