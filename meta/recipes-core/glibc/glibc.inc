@@ -20,7 +20,7 @@ DEPENDS = "virtual/${TARGET_PREFIX}gcc libgcc-initial linux-libc-headers"
 #RDEPENDS_${PN} += "${@['','libgcc']['nptl' in '${GLIBC_ADDONS}']}"
 PROVIDES = "virtual/libc"
 PROVIDES += "virtual/libintl virtual/libiconv"
-inherit autotools texinfo distro_features_check systemd
+inherit autotools texinfo systemd
 
 LEAD_SONAME = "libc.so"
 
