@@ -44,7 +44,7 @@ EXTRA_OECONF = "\
 
 # glibc version is a minimum controlling whether features are enabled. 
 # Doesn't need to track glibc exactly
-EXTRA_OECONF_append_libc-glibc = " --with-glibc-version=2.28 "
+EXTRA_OECONF_append_libc-glibc = " --with-glibc-version=2.24 "
 
 # Set this here since GCC configure won't auto-detect and enable
 # initfini-arry when cross compiling.
