@@ -18,7 +18,10 @@ DEPENDS = "virtual/${TARGET_PREFIX}gcc libgcc-initial linux-libc-headers"
 
 # nptl needs libgcc but dlopens it, so our shlibs code doesn't detect this
 #RDEPENDS_${PN} += "${@['','libgcc']['nptl' in '${GLIBC_ADDONS}']}"
-PROVIDES = "virtual/libc"
+
+CRYPTPROVIDES = "virtual/crypt"
+CRYPTPROVIDES_class-nativesdk = ""
+PROVIDES = "virtual/libc ${CRYPTPROVIDES}"
 PROVIDES += "virtual/libintl virtual/libiconv"
 inherit autotools texinfo systemd
 
