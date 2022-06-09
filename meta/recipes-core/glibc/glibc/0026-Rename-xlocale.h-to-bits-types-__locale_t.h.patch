@@ -1,0 +1,747 @@
+From 05c07b02cb278852f47dcdb1ae8d21e17959947e Mon Sep 17 00:00:00 2001
+From: Zack Weinberg <zackw@panix.com>
+Date: Fri, 9 Jun 2017 12:02:06 -0400
+Subject: [PATCH] Rename xlocale.h to bits/types/__locale_t.h.
+
+xlocale.h is already a single-type micro-header, defining struct
+__locale_struct and the typedefs __locale_t and locale_t.  This patch
+brings it into the bits/types/ scheme: there are now
+bits/types/__locale_t.h which defines only __locale_struct and
+__locale_t, and bits/types/locale_t.h which defines locale_t as well
+as the other two.  None of *our* headers need __locale_t.h, but it
+appears to me that libstdc++ could make use of it.
+
+There are a lot of external uses of xlocale.h, but all the uses I
+checked had an autoconf test or equivalent for its existence.  It has
+never been available from other C libraries, and it has always
+contained a comment reading "This file is not standardized, don't rely
+on it, it can go away without warning" so I think dropping it is
+pretty safe.
+
+I also took the opportunity to clean up comments in various public
+header files that still talk about the *_l interfaces as though they
+were completely nonstandard.  There are a few of them, notably the
+strtoX_l and wcstoX_l families, that haven't been standardized, but
+the bulk are in POSIX.1-2008.
+
+        * locale/xlocale.h: Rename to...
+	* locale/bits/types/__locale_t.h: ...here.  Adjust commentary.
+	Only define struct __locale_struct and __locale_t, not locale_t.
+        * locale/bits/types/locale_t.h: New file; define locale_t here.
+        * locale/Makefile (headers): Update to match.
+
+        * include/xlocale.h: Delete wrapper.
+        * include/bits/types/__locale_t.h: New wrapper.
+        * include/bits/types/locale_t.h: New wrapper.
+
+        * ctype/ctype.h, include/printf.h, include/time.h
+        * locale/langinfo.h, locale/locale.h, stdlib/monetary.h
+        * stdlib/stdlib.h, string/string.h, string/strings.h, time/time.h
+        * wcsmbs/wchar.h, wctype/wctype.h: Use bits/types/locale_t.h.
+        Correct outdated comments regarding the standardization status of
+        the functions that take locale_t arguments.
+
+        * stdlib/strtod_l.c, stdlib/strtof_l.c, stdlib/strtol_l.c
+        * stdlib/strtold_l.c, stdlib/strtoul_l.c, stdlib/strtoull_l.c
+        * sysdeps/ieee754/ldbl-128ibm/strtold_l.c
+        * sysdeps/ieee754/ldbl-64-128/strtold_l.c
+        * wcsmbs/wcstod.c, wcsmbs/wcstod_l.c, wcsmbs/wcstof.c
+        * wcsmbs/wcstof_l.c, wcsmbs/wcstold.c, wcsmbs/wcstold_l.c:
+        Don't include xlocale.h. If necessary, include locale.h instead.
+
+        * stdlib/strtold_l.c: Unconditionally include wchar.h.
+---
+ ChangeLog                                     | 29 +++++++++++++++++++
+ NEWS                                          |  4 +++
+ ctype/ctype.h                                 | 16 ++--------
+ dev/null                                      |  0
+ include/bits/types/__locale_t.h               |  1 +
+ include/bits/types/locale_t.h                 |  1 +
+ include/printf.h                              |  2 +-
+ include/time.h                                |  2 +-
+ include/xlocale.h                             |  1 -
+ locale/Makefile                               |  3 +-
+ locale/{xlocale.h => bits/types/__locale_t.h} | 26 ++++++++---------
+ locale/bits/types/locale_t.h                  | 26 +++++++++++++++++
+ locale/langinfo.h                             |  7 ++---
+ locale/locale.h                               | 20 +++++--------
+ stdlib/monetary.h                             |  3 +-
+ stdlib/stdlib.h                               | 22 ++++----------
+ stdlib/strtod_l.c                             |  3 +-
+ stdlib/strtof_l.c                             |  2 +-
+ stdlib/strtol_l.c                             |  1 -
+ stdlib/strtold_l.c                            |  6 +---
+ stdlib/strtoll_l.c                            |  2 +-
+ stdlib/strtoul_l.c                            |  2 +-
+ stdlib/strtoull_l.c                           |  2 +-
+ string/string.h                               |  6 ++--
+ string/strings.h                              |  6 ++--
+ sysdeps/ieee754/ldbl-128ibm/strtold_l.c       |  1 -
+ sysdeps/ieee754/ldbl-64-128/strtold_l.c       |  1 -
+ time/time.h                                   |  2 +-
+ wcsmbs/wchar.h                                | 27 ++++-------------
+ wcsmbs/wcstod.c                               |  2 +-
+ wcsmbs/wcstod_l.c                             |  2 +-
+ wcsmbs/wcstof.c                               |  2 +-
+ wcsmbs/wcstof_l.c                             |  2 +-
+ wcsmbs/wcstold.c                              |  2 +-
+ wcsmbs/wcstold_l.c                            |  2 +-
+ wctype/wctype.h                               |  4 +--
+ 36 files changed, 121 insertions(+), 119 deletions(-)
+ create mode 100644 dev/null
+ create mode 100644 include/bits/types/__locale_t.h
+ create mode 100644 include/bits/types/locale_t.h
+ delete mode 100644 include/xlocale.h
+ rename locale/{xlocale.h => bits/types/__locale_t.h} (68%)
+ create mode 100644 locale/bits/types/locale_t.h
+
+diff --git a/ChangeLog b/ChangeLog
+index 84ae7a7af8..3fca4462e0 100644
+--- a/ChangeLog
++++ b/ChangeLog
+@@ -1,3 +1,32 @@
++2017-06-20  Zack Weinberg  <zackw@panix.com>
++
++        * locale/xlocale.h: Rename to...
++	* locale/bits/types/__locale_t.h: ...here.  Adjust commentary.
++	Only define struct __locale_struct and __locale_t, not locale_t.
++        * locale/bits/types/locale_t.h: New file; define locale_t here.
++        * locale/Makefile (headers): Update to match.
++
++        * include/xlocale.h: Delete wrapper.
++        * include/bits/types/__locale_t.h: New wrapper.
++        * include/bits/types/locale_t.h: New wrapper.
++
++        * ctype/ctype.h, include/printf.h, include/time.h
++        * locale/langinfo.h, locale/locale.h, stdlib/monetary.h
++        * stdlib/stdlib.h, string/string.h, string/strings.h, time/time.h
++        * wcsmbs/wchar.h, wctype/wctype.h: Use bits/types/locale_t.h.
++        Correct outdated comments regarding the standardization status of
++        the functions that take locale_t arguments.
++
++        * stdlib/strtod_l.c, stdlib/strtof_l.c, stdlib/strtol_l.c
++        * stdlib/strtold_l.c, stdlib/strtoul_l.c, stdlib/strtoull_l.c
++        * sysdeps/ieee754/ldbl-128ibm/strtold_l.c
++        * sysdeps/ieee754/ldbl-64-128/strtold_l.c
++        * wcsmbs/wcstod.c, wcsmbs/wcstod_l.c, wcsmbs/wcstof.c
++        * wcsmbs/wcstof_l.c, wcsmbs/wcstold.c, wcsmbs/wcstold_l.c:
++        Don't include xlocale.h. If necessary, include locale.h instead.
++
++        * stdlib/strtold_l.c: Unconditionally include wchar.h.
++
+ 2016-08-04  Carlos O'Donell  <carlos@redhat.com>
+ 
+ 	* po/de.po: Update from Translation Project.
+diff --git a/NEWS b/NEWS
+index b0447e7169..a434f71cc4 100644
+--- a/NEWS
++++ b/NEWS
+@@ -7,6 +7,10 @@ using `glibc' in the "product" field.
+ 
+ Version 2.24
+ 
++* The nonstandard header <xlocale.h> has been removed.  Most programs should
++  use <locale.h> instead.  If you have a specific need for the definition
++  of locale_t with no other declarations, please talk to us.
++
+ * The minimum Linux kernel version that this version of the GNU C Library
+   can be used with is 3.2, except on i[4567]86 and x86_64, where Linux
+   kernel version 2.6.32 or later suffices (on architectures that already
+diff --git a/ctype/ctype.h b/ctype/ctype.h
+index 6e2124aea0..40be033ae1 100644
+--- a/ctype/ctype.h
++++ b/ctype/ctype.h
+@@ -241,20 +241,8 @@ __NTH (toupper (int __c))
+ 
+ 
+ #ifdef __USE_XOPEN2K8
+-/* The concept of one static locale per category is not very well
+-   thought out.  Many applications will need to process its data using
+-   information from several different locales.  Another application is
+-   the implementation of the internationalization handling in the
+-   upcoming ISO C++ standard library.  To support this another set of
+-   the functions using locale data exist which have an additional
+-   argument.
+-
+-   Attention: all these functions are *not* standardized in any form.
+-   This is a proof-of-concept implementation.  */
+-
+-/* Structure for reentrant locale using functions.  This is an
+-   (almost) opaque type for the user level programs.  */
+-# include <xlocale.h>
++/* POSIX.1-2008 extended locale interface (see locale.h).  */
++# include <bits/types/locale_t.h>
+ 
+ /* These definitions are similar to the ones above but all functions
+    take as an argument a handle for the locale which shall be used.  */
+diff --git a/dev/null b/dev/null
+new file mode 100644
+index 0000000000..e69de29bb2
+diff --git a/include/bits/types/__locale_t.h b/include/bits/types/__locale_t.h
+new file mode 100644
+index 0000000000..610b8197c7
+--- /dev/null
++++ b/include/bits/types/__locale_t.h
+@@ -0,0 +1 @@
++#include <locale/bits/types/__locale_t.h>
+diff --git a/include/bits/types/locale_t.h b/include/bits/types/locale_t.h
+new file mode 100644
+index 0000000000..24b074872f
+--- /dev/null
++++ b/include/bits/types/locale_t.h
+@@ -0,0 +1 @@
++#include <locale/bits/types/locale_t.h>
+diff --git a/include/printf.h b/include/printf.h
+index b12b5dc971..41c6fcf27a 100644
+--- a/include/printf.h
++++ b/include/printf.h
+@@ -1,7 +1,7 @@
+ #ifndef	_PRINTF_H
+ 
+ #include <stdio-common/printf.h>
+-#include <xlocale.h>
++#include <bits/types/locale_t.h>
+ 
+ /* Now define the internal interfaces.  */
+ extern int __printf_fphex (FILE *, const struct printf_info *,
+diff --git a/include/time.h b/include/time.h
+index 8dd10dcdd8..b4dc902b07 100644
+--- a/include/time.h
++++ b/include/time.h
+@@ -3,7 +3,7 @@
+ # include <time/time.h>
+ #else
+ # include <time/time.h>
+-# include <xlocale.h>
++# include <bits/types/locale_t.h>
+ 
+ __BEGIN_DECLS
+ 
+diff --git a/include/xlocale.h b/include/xlocale.h
+deleted file mode 100644
+index 5280ef0bc4..0000000000
+--- a/include/xlocale.h
++++ /dev/null
+@@ -1 +0,0 @@
+-#include <locale/xlocale.h>
+diff --git a/locale/Makefile b/locale/Makefile
+index c98c67546a..165d768dae 100644
+--- a/locale/Makefile
++++ b/locale/Makefile
+@@ -22,7 +22,8 @@ subdir	:= locale
+ 
+ include ../Makeconfig
+ 
+-headers		= locale.h bits/locale.h langinfo.h xlocale.h
++headers		= langinfo.h locale.h bits/locale.h \
++		  bits/types/locale_t.h bits/types/__locale_t.h
+ routines	= setlocale findlocale loadlocale loadarchive \
+ 		  localeconv nl_langinfo nl_langinfo_l mb_cur_max \
+ 		  newlocale duplocale freelocale uselocale \
+diff --git a/locale/xlocale.h b/locale/bits/types/__locale_t.h
+similarity index 68%
+rename from locale/xlocale.h
+rename to locale/bits/types/__locale_t.h
+index e4408e2e99..4511aa1929 100644
+--- a/locale/xlocale.h
++++ b/locale/bits/types/__locale_t.h
+@@ -1,5 +1,5 @@
+-/* Definition of locale datatype.
+-   Copyright (C) 1997-2016 Free Software Foundation, Inc.
++/* Definition of struct __locale_struct and __locale_t.
++   Copyright (C) 1997-2017 Free Software Foundation, Inc.
+    This file is part of the GNU C Library.
+    Contributed by Ulrich Drepper <drepper@cygnus.com>, 1997.
+ 
+@@ -17,14 +17,15 @@
+    License along with the GNU C Library; if not, see
+    <http://www.gnu.org/licenses/>.  */
+ 
+-#ifndef _XLOCALE_H
+-#define _XLOCALE_H	1
++#ifndef _BITS_TYPES___LOCALE_T_H
++#define _BITS_TYPES___LOCALE_T_H 1
+ 
+-/* Structure for reentrant locale using functions.  This is an
+-   (almost) opaque type for the user level programs.  The file and
+-   this data structure is not standardized.  Don't rely on it.  It can
+-   go away without warning.  */
+-typedef struct __locale_struct
++/* POSIX.1-2008: the locale_t type, representing a locale context
++   (implementation-namespace version).  This type should be treated
++   as opaque by applications; some details are exposed for the sake of
++   efficiency in e.g. ctype functions.  */
++
++struct __locale_struct
+ {
+   /* Note: LC_ALL is not a valid index into this array.  */
+   struct __locale_data *__locales[13]; /* 13 = __LC_LAST. */
+@@ -36,9 +37,8 @@ typedef struct __locale_struct
+ 
+   /* Note: LC_ALL is not a valid index into this array.  */
+   const char *__names[13];
+-} *__locale_t;
++};
+ 
+-/* POSIX 2008 makes locale_t official.  */
+-typedef __locale_t locale_t;
++typedef struct __locale_struct *__locale_t;
+ 
+-#endif /* xlocale.h */
++#endif /* bits/types/__locale_t.h */
+diff --git a/locale/bits/types/locale_t.h b/locale/bits/types/locale_t.h
+new file mode 100644
+index 0000000000..de7ec2ee84
+--- /dev/null
++++ b/locale/bits/types/locale_t.h
+@@ -0,0 +1,26 @@
++/* Definition of locale_t.
++   Copyright (C) 2017 Free Software Foundation, Inc.
++   This file is part of the GNU C Library.
++
++   The GNU C Library is free software; you can redistribute it and/or
++   modify it under the terms of the GNU Lesser General Public
++   License as published by the Free Software Foundation; either
++   version 2.1 of the License, or (at your option) any later version.
++
++   The GNU C Library is distributed in the hope that it will be useful,
++   but WITHOUT ANY WARRANTY; without even the implied warranty of
++   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++   Lesser General Public License for more details.
++
++   You should have received a copy of the GNU Lesser General Public
++   License along with the GNU C Library; if not, see
++   <http://www.gnu.org/licenses/>.  */
++
++#ifndef _BITS_TYPES_LOCALE_T_H
++#define _BITS_TYPES_LOCALE_T_H 1
++
++#include <bits/types/__locale_t.h>
++
++typedef __locale_t locale_t;
++
++#endif /* bits/types/locale_t.h */
+diff --git a/locale/langinfo.h b/locale/langinfo.h
+index 04347eb2b8..39231d98f4 100644
+--- a/locale/langinfo.h
++++ b/locale/langinfo.h
+@@ -584,11 +584,8 @@ extern char *nl_langinfo (nl_item __item) __THROW;
+ 
+ 
+ #ifdef __USE_XOPEN2K8
+-/* This interface is for the extended locale model.  See <locale.h> for
+-   more information.  */
+-
+-/* Get locale datatype definition.  */
+-# include <xlocale.h>
++/* POSIX.1-2008 extended locale interface (see locale.h).  */
++# include <bits/types/locale_t.h>
+ 
+ /* Just like nl_langinfo but get the information from the locale object L.  */
+ extern char *nl_langinfo_l (nl_item __item, __locale_t __l);
+diff --git a/locale/locale.h b/locale/locale.h
+index 2f85c6cfb1..fb015f68e9 100644
+--- a/locale/locale.h
++++ b/locale/locale.h
+@@ -130,19 +130,13 @@ __END_NAMESPACE_STD
+ 
+ 
+ #ifdef	__USE_XOPEN2K8
+-/* The concept of one static locale per category is not very well
+-   thought out.  Many applications will need to process its data using
+-   information from several different locales.  Another application is
+-   the implementation of the internationalization handling in the
+-   upcoming ISO C++ standard library.  To support this another set of
+-   the functions using locale data exist which have an additional
+-   argument.
+-
+-   Attention: all these functions are *not* standardized in any form.
+-   This is a proof-of-concept implementation.  */
+-
+-/* Get locale datatype definition.  */
+-# include <xlocale.h>
++/* POSIX.1-2008 extends the locale interface with functions for
++   explicit creation and manipulation of 'locale_t' objects
++   representing locale contexts, and a set of parallel
++   locale-sensitive text processing functions that take a locale_t
++   argument.  This enables applications to work with data from
++   multiple locales simultaneously and thread-safely.  */
++# include <bits/types/locale_t.h>
+ 
+ /* Return a reference to a data structure representing a set of locale
+    datasets.  Unlike for the CATEGORY parameter for `setlocale' the
+diff --git a/stdlib/monetary.h b/stdlib/monetary.h
+index 1fe9d6b2d4..92ec833f70 100644
+--- a/stdlib/monetary.h
++++ b/stdlib/monetary.h
+@@ -40,7 +40,8 @@ extern ssize_t strfmon (char *__restrict __s, size_t __maxsize,
+      __THROW __attribute_format_strfmon__ (3, 4);
+ 
+ #ifdef __USE_XOPEN2K8
+-# include <xlocale.h>
++/* POSIX.1-2008 extended locale interface (see locale.h).  */
++# include <bits/types/locale_t.h>
+ 
+ /* Formatting a monetary value according to the given locale.  */
+ extern ssize_t strfmon_l (char *__restrict __s, size_t __maxsize,
+diff --git a/stdlib/stdlib.h b/stdlib/stdlib.h
+index f0dc951acf..4ffd0dc66d 100644
+--- a/stdlib/stdlib.h
++++ b/stdlib/stdlib.h
+@@ -180,23 +180,11 @@ __END_NAMESPACE_C99
+ 
+ 
+ #ifdef __USE_GNU
+-/* The concept of one static locale per category is not very well
+-   thought out.  Many applications will need to process its data using
+-   information from several different locales.  Another problem is
+-   the implementation of the internationalization handling in the
+-   ISO C++ standard library.  To support this another set of
+-   the functions using locale data exist which take an additional
+-   argument.
+-
+-   Attention: even though several *_l interfaces are part of POSIX:2008,
+-   these are not.  */
+-
+-/* Structure for reentrant locale using functions.  This is an
+-   (almost) opaque type for the user level programs.  */
+-# include <xlocale.h>
+-
+-/* Special versions of the functions above which take the locale to
+-   use as an additional parameter.  */
++/* Parallel versions of the functions above which take the locale to
++   use as an additional parameter.  These are GNU extensions inspired
++   by the POSIX.1-2008 extended locale API.  */
++# include <bits/types/locale_t.h>
++
+ extern long int strtol_l (const char *__restrict __nptr,
+ 			  char **__restrict __endptr, int __base,
+ 			  __locale_t __loc) __THROW __nonnull ((1, 4));
+diff --git a/stdlib/strtod_l.c b/stdlib/strtod_l.c
+index 3d66eac706..7f1096d5d0 100644
+--- a/stdlib/strtod_l.c
++++ b/stdlib/strtod_l.c
+@@ -17,7 +17,7 @@
+    License along with the GNU C Library; if not, see
+    <http://www.gnu.org/licenses/>.  */
+ 
+-#include <xlocale.h>
++#include <locale.h>
+ 
+ extern double ____strtod_l_internal (const char *, char **, int, __locale_t);
+ 
+@@ -46,7 +46,6 @@ extern double ____strtod_l_internal (const char *, char **, int, __locale_t);
+ #include <errno.h>
+ #include <float.h>
+ #include "../locale/localeinfo.h"
+-#include <locale.h>
+ #include <math.h>
+ #include <math_private.h>
+ #include <stdlib.h>
+diff --git a/stdlib/strtof_l.c b/stdlib/strtof_l.c
+index 32e995edc5..305452c85c 100644
+--- a/stdlib/strtof_l.c
++++ b/stdlib/strtof_l.c
+@@ -17,7 +17,7 @@
+    License along with the GNU C Library; if not, see
+    <http://www.gnu.org/licenses/>.  */
+ 
+-#include <xlocale.h>
++#include <locale.h>
+ 
+ extern float ____strtof_l_internal (const char *, char **, int, __locale_t);
+ 
+diff --git a/stdlib/strtol_l.c b/stdlib/strtol_l.c
+index f4c17694ab..20dc541e48 100644
+--- a/stdlib/strtol_l.c
++++ b/stdlib/strtol_l.c
+@@ -41,7 +41,6 @@
+ #include <stdlib.h>
+ #include <string.h>
+ #include <locale.h>
+-#include <xlocale.h>
+ #include <stdint.h>
+ #include <bits/wordsize.h>
+ 
+diff --git a/stdlib/strtold_l.c b/stdlib/strtold_l.c
+index 73ef0dd1d0..6653f27bfe 100644
+--- a/stdlib/strtold_l.c
++++ b/stdlib/strtold_l.c
+@@ -17,11 +17,7 @@
+ 
+ #include <math.h>
+ #include <stdlib.h>
+-#include <xlocale.h>
+-
+-#if defined _LIBC || defined HAVE_WCHAR_H
+-# include <wchar.h>
+-#endif
++#include <wchar.h>
+ 
+ #ifdef USE_WIDE_CHAR
+ # define STRING_TYPE	wchar_t
+diff --git a/stdlib/strtoll_l.c b/stdlib/strtoll_l.c
+index 5684bac7e9..2e3be1e0eb 100644
+--- a/stdlib/strtoll_l.c
++++ b/stdlib/strtoll_l.c
+@@ -19,7 +19,7 @@
+ 
+ #define QUAD	1
+ 
+-#include <xlocale.h>
++#include <locale.h>
+ 
+ extern long long int ____strtoll_l_internal (const char *, char **, int, int,
+ 					     __locale_t);
+diff --git a/stdlib/strtoul_l.c b/stdlib/strtoul_l.c
+index 3cbd3035e1..2c60d07a3d 100644
+--- a/stdlib/strtoul_l.c
++++ b/stdlib/strtoul_l.c
+@@ -19,7 +19,7 @@
+ 
+ #define UNSIGNED	1
+ 
+-#include <xlocale.h>
++#include <locale.h>
+ 
+ extern unsigned long int ____strtoul_l_internal (const char *, char **, int,
+ 						 int, __locale_t);
+diff --git a/stdlib/strtoull_l.c b/stdlib/strtoull_l.c
+index f45f103dfb..cf1ef0310d 100644
+--- a/stdlib/strtoull_l.c
++++ b/stdlib/strtoull_l.c
+@@ -20,7 +20,7 @@
+ #define QUAD		1
+ #define UNSIGNED	1
+ 
+-#include <xlocale.h>
++#include <locale.h>
+ 
+ extern unsigned long long int ____strtoull_l_internal (const char *, char **,
+ 						       int, int, __locale_t);
+diff --git a/string/string.h b/string/string.h
+index c7f8fde7b8..17fa3ada3b 100644
+--- a/string/string.h
++++ b/string/string.h
+@@ -153,10 +153,8 @@ extern size_t strxfrm (char *__restrict __dest,
+ __END_NAMESPACE_STD
+ 
+ #ifdef __USE_XOPEN2K8
+-/* The following functions are equivalent to the both above but they
+-   take the locale they use for the collation as an extra argument.
+-   This is not standardsized but something like will come.  */
+-# include <xlocale.h>
++/* POSIX.1-2008 extended locale interface (see locale.h).  */
++# include <bits/types/locale_t.h>
+ 
+ /* Compare the collated forms of S1 and S2 using rules from L.  */
+ extern int strcoll_l (const char *__s1, const char *__s2, __locale_t __l)
+diff --git a/string/strings.h b/string/strings.h
+index e372a331b3..b81f4a41b2 100644
+--- a/string/strings.h
++++ b/string/strings.h
+@@ -117,10 +117,8 @@ extern int strncasecmp (const char *__s1, const char *__s2, size_t __n)
+      __THROW __attribute_pure__;
+ 
+ #ifdef	__USE_XOPEN2K8
+-/* The following functions are equivalent to the both above but they
+-   take the locale they use for the collation as an extra argument.
+-   This is not standardsized but something like will come.  */
+-# include <xlocale.h>
++/* POSIX.1-2008 extended locale interface (see locale.h).  */
++# include <bits/types/locale_t.h>
+ 
+ /* Again versions of a few functions which use the given locale instead
+    of the global one.  */
+diff --git a/sysdeps/ieee754/ldbl-128ibm/strtold_l.c b/sysdeps/ieee754/ldbl-128ibm/strtold_l.c
+index a8181740a8..c0d1d38bd5 100644
+--- a/sysdeps/ieee754/ldbl-128ibm/strtold_l.c
++++ b/sysdeps/ieee754/ldbl-128ibm/strtold_l.c
+@@ -18,7 +18,6 @@
+ #include <math.h>
+ #include <stdlib.h>
+ #include <wchar.h>
+-#include <xlocale.h>
+ 
+ /* The actual implementation for all floating point sizes is in strtod.c.
+    These macros tell it to produce the `long double' version, `strtold'.  */
+diff --git a/sysdeps/ieee754/ldbl-64-128/strtold_l.c b/sysdeps/ieee754/ldbl-64-128/strtold_l.c
+index a8181740a8..c0d1d38bd5 100644
+--- a/sysdeps/ieee754/ldbl-64-128/strtold_l.c
++++ b/sysdeps/ieee754/ldbl-64-128/strtold_l.c
+@@ -18,7 +18,6 @@
+ #include <math.h>
+ #include <stdlib.h>
+ #include <wchar.h>
+-#include <xlocale.h>
+ 
+ /* The actual implementation for all floating point sizes is in strtod.c.
+    These macros tell it to produce the `long double' version, `strtold'.  */
+diff --git a/time/time.h b/time/time.h
+index cc93917b82..2f0818805d 100644
+--- a/time/time.h
++++ b/time/time.h
+@@ -218,7 +218,7 @@ extern char *strptime (const char *__restrict __s,
+ # ifdef __USE_XOPEN2K8
+ /* Similar to the two functions above but take the information from
+    the provided locale and not the global locale.  */
+-# include <xlocale.h>
++# include <bits/types/locale_t.h>
+ 
+ extern size_t strftime_l (char *__restrict __s, size_t __maxsize,
+ 			  const char *__restrict __format,
+diff --git a/wcsmbs/wchar.h b/wcsmbs/wchar.h
+index e4134167dc..42319ffc6d 100644
+--- a/wcsmbs/wchar.h
++++ b/wcsmbs/wchar.h
+@@ -26,6 +26,9 @@
+ # define _WCHAR_H 1
+ # include <features.h>
+ #endif
++#ifdef __USE_XOPEN2K8
++# include <bits/types/locale_t.h>
++#endif
+ 
+ #ifdef _WCHAR_H
+ /* Get FILE definition.  */
+@@ -180,8 +183,6 @@ extern int wcsncasecmp (const wchar_t *__s1, const wchar_t *__s2,
+ 
+ /* Similar to the two functions above but take the information from
+    the provided locale and not the global locale.  */
+-# include <xlocale.h>
+-
+ extern int wcscasecmp_l (const wchar_t *__s1, const wchar_t *__s2,
+ 			 __locale_t __loc) __THROW;
+ 
+@@ -513,23 +514,9 @@ extern unsigned long long int wcstouq (const wchar_t *__restrict __nptr,
+ #endif /* Use GNU.  */
+ 
+ #ifdef __USE_GNU
+-/* The concept of one static locale per category is not very well
+-   thought out.  Many applications will need to process its data using
+-   information from several different locales.  Another application is
+-   the implementation of the internationalization handling in the
+-   upcoming ISO C++ standard library.  To support this another set of
+-   the functions using locale data exist which have an additional
+-   argument.
+-
+-   Attention: all these functions are *not* standardized in any form.
+-   This is a proof-of-concept implementation.  */
+-
+-/* Structure for reentrant locale using functions.  This is an
+-   (almost) opaque type for the user level programs.  */
+-# include <xlocale.h>
+-
+-/* Special versions of the functions above which take the locale to
+-   use as an additional parameter.  */
++/* Parallel versions of the functions above which take the locale to
++   use as an additional parameter.  These are GNU extensions inspired
++   by the POSIX.1-2008 extended locale API.  */
+ extern long int wcstol_l (const wchar_t *__restrict __nptr,
+ 			  wchar_t **__restrict __endptr, int __base,
+ 			  __locale_t __loc) __THROW;
+@@ -861,8 +848,6 @@ extern size_t wcsftime (wchar_t *__restrict __s, size_t __maxsize,
+ __END_NAMESPACE_C99
+ 
+ # ifdef __USE_GNU
+-# include <xlocale.h>
+-
+ /* Similar to `wcsftime' but takes the information from
+    the provided locale and not the global locale.  */
+ extern size_t wcsftime_l (wchar_t *__restrict __s, size_t __maxsize,
+diff --git a/wcsmbs/wcstod.c b/wcsmbs/wcstod.c
+index 8e16234a40..1f945ed0b2 100644
+--- a/wcsmbs/wcstod.c
++++ b/wcsmbs/wcstod.c
+@@ -17,7 +17,7 @@
+    <http://www.gnu.org/licenses/>.  */
+ 
+ #include <stddef.h>
+-#include <xlocale.h>
++#include <locale.h>
+ 
+ 
+ #define	USE_WIDE_CHAR	1
+diff --git a/wcsmbs/wcstod_l.c b/wcsmbs/wcstod_l.c
+index 62e75ed19c..99ba6bbf1c 100644
+--- a/wcsmbs/wcstod_l.c
++++ b/wcsmbs/wcstod_l.c
+@@ -18,7 +18,7 @@
+    <http://www.gnu.org/licenses/>.  */
+ 
+ #include <stddef.h>
+-#include <xlocale.h>
++#include <locale.h>
+ 
+ 
+ extern double ____wcstod_l_internal (const wchar_t *, wchar_t **, int,
+diff --git a/wcsmbs/wcstof.c b/wcsmbs/wcstof.c
+index ac998cf038..37e2045c7b 100644
+--- a/wcsmbs/wcstof.c
++++ b/wcsmbs/wcstof.c
+@@ -17,7 +17,7 @@
+    <http://www.gnu.org/licenses/>.  */
+ 
+ #include <stddef.h>
+-#include <xlocale.h>
++#include <locale.h>
+ 
+ #define	USE_WIDE_CHAR	1
+ 
+diff --git a/wcsmbs/wcstof_l.c b/wcsmbs/wcstof_l.c
+index f03f3ef0ec..0d1d2cb7e6 100644
+--- a/wcsmbs/wcstof_l.c
++++ b/wcsmbs/wcstof_l.c
+@@ -18,7 +18,7 @@
+    <http://www.gnu.org/licenses/>.  */
+ 
+ #include <stddef.h>
+-#include <xlocale.h>
++#include <locale.h>
+ 
+ 
+ #define	USE_WIDE_CHAR	1
+diff --git a/wcsmbs/wcstold.c b/wcsmbs/wcstold.c
+index 03d4c96afc..6a74753a99 100644
+--- a/wcsmbs/wcstold.c
++++ b/wcsmbs/wcstold.c
+@@ -17,7 +17,7 @@
+    <http://www.gnu.org/licenses/>.  */
+ 
+ #include <stddef.h>
+-#include <xlocale.h>
++#include <locale.h>
+ 
+ #define USE_WIDE_CHAR	1
+ 
+diff --git a/wcsmbs/wcstold_l.c b/wcsmbs/wcstold_l.c
+index c7459f82ab..ee06fc44da 100644
+--- a/wcsmbs/wcstold_l.c
++++ b/wcsmbs/wcstold_l.c
+@@ -18,7 +18,7 @@
+    <http://www.gnu.org/licenses/>.  */
+ 
+ #include <stddef.h>
+-#include <xlocale.h>
++#include <locale.h>
+ 
+ #define USE_WIDE_CHAR	1
+ 
+diff --git a/wctype/wctype.h b/wctype/wctype.h
+index acbd8dfb10..4ab089744b 100644
+--- a/wctype/wctype.h
++++ b/wctype/wctype.h
+@@ -222,8 +222,8 @@ extern wint_t towctrans (wint_t __wc, wctrans_t __desc) __THROW;
+ __END_NAMESPACE_C99
+ 
+ # ifdef __USE_XOPEN2K8
+-/* Declare the interface to extended locale model.  */
+-#  include <xlocale.h>
++/* POSIX.1-2008 extended locale interface (see locale.h).  */
++#  include <bits/types/locale_t.h>
+ 
+ /* Test for any wide character for which `iswalpha' or `iswdigit' is
+    true.  */
+-- 
+2.34.1
+
