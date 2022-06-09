@@ -21,6 +21,7 @@ S = "${WORKDIR}/git"
 
 inherit autotools pkgconfig gettext
 
+BBCLASSEXTEND = "native nativesdk"
 EXTRA_OECONF += "--libdir=${libdir}/nsl --includedir=${includedir}/nsl"
 
 do_install_append() {
