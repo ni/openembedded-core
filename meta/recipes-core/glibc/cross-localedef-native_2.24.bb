@@ -12,8 +12,8 @@ LIC_FILES_CHKSUM = "file://LICENSES;md5=e9a558e243b36d3209f380deb394b213 \
 #
 AUTOTOOLS_SCRIPT_PATH = "${S}/localedef"
 
-inherit native
 inherit autotools
+inherit native
 
 FILESEXTRAPATHS =. "${FILE_DIRNAME}/${PN}:${FILE_DIRNAME}/glibc:"
 
