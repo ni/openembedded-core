@@ -1334,7 +1334,7 @@ class OpkgPM(OpkgDpkgPM):
                 pkg_info = cmd + pkg
 
                 try:
-                    output = subprocess.check_output(pkg_info.split(), stderr=subprocess.STDOUT).strip().decode("utf-8")
+                    output = subprocess.check_output(pkg_info.split()).strip().decode("utf-8")
                 except subprocess.CalledProcessError as e:
                     bb.fatal("Cannot get package info. Command '%s' "
                              "returned %d:\n%s" % (pkg_info, e.returncode, e.output.decode("utf-8")))
