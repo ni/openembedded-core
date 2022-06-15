@@ -15,6 +15,7 @@ PV = "1.3.0"
 SRCREV = "fbad7b36acaa89a54023930af70805649f962999"
 
 SRC_URI = "git://github.com/thkukuk/libnsl;branch=master;protocol=https \
+           file://libnsl2_libs.conf \
           "
 
 S = "${WORKDIR}/git"
@@ -27,8 +28,11 @@ EXTRA_OECONF += "--libdir=${libdir}/nsl --includedir=${includedir}/nsl"
 do_install_append() {
 	install -d ${D}${libdir}
 	mv ${D}${libdir}/nsl/pkgconfig ${D}${libdir}
+
+	install -d ${D}${sysconfdir}/ld.so.conf.d/
+	install -m 0644 ${WORKDIR}/libnsl2_libs.conf ${D}${sysconfdir}/ld.so.conf.d/
 }
 
-FILES_${PN} += "${libdir}/nsl/*.so.*"
+FILES_${PN} += "${libdir}/nsl/*.so.* ${sysconfdir}/ld.so.conf.d/libnsl2_libs.conf"
 FILES_${PN}-dev += "${includedir}/nsl ${libdir}/nsl/*.so"
 FILES_${PN}-staticdev += "${libdir}/nsl/*.a"
