@@ -219,9 +219,9 @@ python package_do_split_gconvs () {
         d.setVar('RDEPENDS_%s' % pkgname, '%slocaledef %s-localedata-%s %s-charmap-%s' % \
         (mlprefix, mlprefix+bpn, legitimize_package_name(locale), mlprefix+bpn, legitimize_package_name(encoding)))
         d.setVar('pkg_postinst_ontarget_%s' % pkgname, d.getVar('locale_base_postinst_ontarget') \
-        % (locale, encoding, locale))
+        % (locale, encoding, name))
         d.setVar('pkg_postrm_%s' % pkgname, d.getVar('locale_base_postrm') % \
-        (locale, encoding, locale))
+        (locale, encoding, name))
 
     def output_locale_binary_rdepends(name, pkgname, locale, encoding):
         dep = legitimize_package_name('%s-binary-localedata-%s' % (bpn, name))
