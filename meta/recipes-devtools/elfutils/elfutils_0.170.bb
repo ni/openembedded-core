@@ -15,7 +15,6 @@ SRC_URI = "https://sourceware.org/elfutils/ftp/${PV}/${BP}.tar.bz2 \
            file://0005-fix-a-stack-usage-warning.patch \
            file://0006-Fix-build-on-aarch64-musl.patch \
            file://0007-Fix-control-path-where-we-have-str-as-uninitialized-.patch \
-           file://0009-libelf-Mark-both-fsize-and-msize-with-const-attribut.patch \
            file://0001-libasm-may-link-with-libbz2-if-found.patch \
            file://debian/hppa_backend.diff \
            file://debian/arm_backend.diff \
