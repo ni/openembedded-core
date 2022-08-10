@@ -8,7 +8,6 @@ SRC_URI += "file://0001-define-macro-_PATH_DHCPD_CONF-and-_PATH_DHCLIENT_CON.pat
             file://0007-Add-configure-argument-to-make-the-libxml2-dependenc.patch \
             file://0009-remove-dhclient-script-bash-dependency.patch \
             file://0012-dhcp-correct-the-intention-for-xml2-lib-search.patch \
-            file://0013-workaround-busybox-limitation-in-linux-dhclient-script.patch \
             file://0013-fixup_use_libbind.patch \
             file://0001-master-Added-includes-of-new-BIND9-compatibility-hea.patch \
             file://0001-Fix-a-NSUPDATE-compiling-issue.patch \
