@@ -10,7 +10,7 @@ LIC_FILES_CHKSUM = "file://LICENSE;md5=55aa8c9fcad0691cef0ecd420361e390"
 
 DEPENDS = "gnutls"
 
-SRC_URI = "git://github.com/iputils/iputils \
+SRC_URI = "git://github.com/iputils/iputils;protocol=https \
            file://0001-rarpd-rdisc-Drop-PrivateUsers.patch \
            "
 SRCREV = "cc16da6b574ce6637f3e6e9ab3c1a728663006ff"
