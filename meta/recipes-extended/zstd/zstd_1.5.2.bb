@@ -38,6 +38,6 @@ do_install () {
 
 PACKAGE_BEFORE_PN = "libzstd"
 
-FILES:libzstd = "${libdir}/libzstd${SOLIBS}"
+FILES_libzstd = "${libdir}/libzstd${SOLIBS}"
 
 BBCLASSEXTEND = "native nativesdk"
