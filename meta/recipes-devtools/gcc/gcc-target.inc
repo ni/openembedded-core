@@ -116,6 +116,7 @@ FILES_gcov-symlinks = "${bindir}/gcov \
 FILES_g++ = "\
     ${bindir}/${TARGET_PREFIX}g++* \
     ${libexecdir}/gcc/${TARGET_SYS}/${BINV}/cc1plus \
+    ${libexecdir}/gcc/${TARGET_SYS}/${BINV}/g++* \
 "
 FILES_g++-symlinks = "\
     ${bindir}/c++ \
