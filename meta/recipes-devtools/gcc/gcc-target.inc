@@ -172,6 +172,7 @@ do_install () {
 
 	# We don't care about the gcc-<version> ones for this
 	rm -f *gcc-?.?*
+	rm -f *gcc-??.?*
 
 	# We use libiberty from binutils
 	find ${D}${libdir} -name libiberty.a | xargs rm -f
