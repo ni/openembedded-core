@@ -2,7 +2,7 @@ SUMMARY = "Shared library optimisation tool"
 DESCRIPTION = "mklibs produces cut-down shared libraries that contain only the routines required by a particular set of executables."
 HOMEPAGE = "https://launchpad.net/mklibs"
 SECTION = "devel"
-LICENSE = "GPLv2+"
+LICENSE = "GPL-2.0-or-later"
 LIC_FILES_CHKSUM = "file://debian/copyright;md5=98d31037b13d896e33890738ef01af64"
 
 SRC_URI = "http://snapshot.debian.org/archive/debian/20161123T152011Z/pool/main/m/mklibs/mklibs_${PV}.tar.xz \

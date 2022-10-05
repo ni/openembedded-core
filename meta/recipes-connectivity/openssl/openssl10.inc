@@ -5,7 +5,7 @@ BUGTRACKER = "http://www.openssl.org/news/vulnerabilities.html"
 SECTION = "libs/network"
 
 # "openssl | SSLeay" dual license
-LICENSE = "openssl"
+LICENSE = "OpenSSL"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=f9a8f968107345e0b75aa8c2ecaa7ec8"
 
 DEPENDS = "makedepend-native hostperl-runtime-native"

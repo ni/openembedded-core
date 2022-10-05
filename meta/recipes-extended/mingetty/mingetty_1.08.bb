@@ -1,7 +1,7 @@
 SUMMARY = "Compact getty terminal handler for virtual consoles only"
 SECTION = "console/utils"
 HOMEPAGE = "http://sourceforge.net/projects/mingetty/"
-LICENSE = "GPLv2"
+LICENSE = "GPL-2.0-only"
 PR = "r3"
 
 LIC_FILES_CHKSUM = "file://COPYING;md5=0c56db0143f4f80c369ee3af7425af6e"

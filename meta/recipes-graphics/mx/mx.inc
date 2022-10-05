@@ -1,5 +1,5 @@
 SUMMARY = "Clutter based UI widget library"
-LICENSE = "LGPLv2.1"
+LICENSE = "LGPL-2.1-only"
 
 inherit clutter autotools distro_features_check gobject-introspection gtk-doc
 # depends on clutter-1.0 which depends on cogl-1.0

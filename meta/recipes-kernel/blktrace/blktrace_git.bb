@@ -1,6 +1,6 @@
 SUMMARY = "Generates traces of I/O traffic on block devices"
 HOMEPAGE = "http://brick.kernel.dk/snaps/"
-LICENSE = "GPLv2"
+LICENSE = "GPL-2.0-only"
 LIC_FILES_CHKSUM = "file://COPYING;md5=393a5ca445f6965873eca0259a17f833"
 
 DEPENDS = "libaio"

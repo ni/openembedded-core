@@ -1,9 +1,9 @@
 SUMMARY = "Library for ASN.1 and DER manipulation"
 HOMEPAGE = "http://www.gnu.org/software/libtasn1/"
 
-LICENSE = "GPLv3+ & LGPLv2.1+"
-LICENSE_${PN}-bin = "GPLv3+"
-LICENSE_${PN} = "LGPLv2.1+"
+LICENSE = "GPL-3.0-or-later & LGPL-2.1-or-later"
+LICENSE_${PN}-bin = "GPL-3.0-or-later"
+LICENSE_${PN} = "LGPL-2.1-or-later"
 LIC_FILES_CHKSUM = "file://COPYING;md5=d32239bcb673463ab874e80d47fae504 \
                     file://COPYING.LIB;md5=4fbd65380cdd255951079008b364516c \
                     file://README;endline=8;md5=c3803a3e8ca5ab5eb1e5912faa405351"

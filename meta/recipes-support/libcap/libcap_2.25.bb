@@ -2,7 +2,7 @@ SUMMARY = "Library for getting/setting POSIX.1e capabilities"
 HOMEPAGE = "http://sites.google.com/site/fullycapable/"
 
 # no specific GPL version required
-LICENSE = "BSD | GPLv2"
+LICENSE = "BSD | GPL-2.0-only"
 LIC_FILES_CHKSUM = "file://License;md5=3f84fd6f29d453a56514cb7e4ead25f1"
 
 DEPENDS = "hostperl-runtime-native gperf-native"

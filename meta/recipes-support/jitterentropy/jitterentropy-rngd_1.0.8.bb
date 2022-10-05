@@ -8,7 +8,7 @@ Especially during boot time, when the entropy of Linux is low, the Jitter RNGd \
 provides a source of sufficient entropy."
 HOMEPAGE = "http://www.chronox.de/jent.html"
 
-LICENSE = "GPLv2+ | BSD"
+LICENSE = "GPL-2.0-or-later | BSD"
 LIC_FILES_CHKSUM = "file://COPYING;md5=e52365752b36cfcd7f9601d80de7d8c6 \
                     file://COPYING.bsd;md5=66a5cedaf62c4b2637025f049f9b826f \
                     file://COPYING.gplv2;md5=eb723b61539feef013de476e68b5c50a \

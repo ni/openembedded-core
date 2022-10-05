@@ -20,7 +20,7 @@ acceleration submodules is not stable yet.  This driver requires the \
 omapdrm kernel driver w/ GEM support. \
 "
 
-LICENSE = "GPLv2+"
+LICENSE = "GPL-2.0-or-later"
 LIC_FILES_CHKSUM = "file://COPYING;md5=10ce5de3b111315ea652a5f74ec0c602"
 DEPENDS += "virtual/libx11 libdrm xf86driproto"
 

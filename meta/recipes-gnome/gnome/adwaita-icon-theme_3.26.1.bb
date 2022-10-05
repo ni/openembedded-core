@@ -3,7 +3,7 @@ HOMEPAGE = "http://ftp.gnome.org/pub/GNOME/sources/adwaita-icon-theme/"
 BUGTRACKER = "https://bugzilla.gnome.org/"
 SECTION = "x11/gnome"
 
-LICENSE = "LGPL-3.0 | CC-BY-SA-3.0"
+LICENSE = "LGPL-3.0-only | CC-BY-SA-3.0"
 LIC_FILES_CHKSUM = "file://COPYING;md5=c84cac88e46fc07647ea07e6c24eeb7c"
 
 inherit allarch autotools pkgconfig gettext gtk-icon-cache upstream-version-is-even

@@ -1,7 +1,7 @@
 SUMMARY = "Collection of autoconf m4 macros"
 SECTION = "base"
 HOMEPAGE = "http://sourceforge.net/projects/cwautomacros.berlios/"
-LICENSE = "GPLv2"
+LICENSE = "GPL-2.0-only"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=eb723b61539feef013de476e68b5c50a"
 
 SRC_URI = "${SOURCEFORGE_MIRROR}/${BPN}.berlios/${BP}.tar.bz2"

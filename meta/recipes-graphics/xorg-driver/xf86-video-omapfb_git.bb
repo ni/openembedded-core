@@ -5,7 +5,7 @@ SUMMARY = "X.Org X server -- Texas Instruments OMAP framebuffer driver"
 DESCRIPTION = "omapfb driver supports the basic Texas Instruments OMAP \
 framebuffer."
 
-LICENSE = "MIT-X & GPLv2+"
+LICENSE = "MIT & GPL-2.0-or-later"
 LIC_FILES_CHKSUM = "file://COPYING;md5=63e2cbac53863f60e2f43343fb34367f"
 DEPENDS += "virtual/libx11"
 

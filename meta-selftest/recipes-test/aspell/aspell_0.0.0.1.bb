@@ -5,7 +5,7 @@
 SUMMARY = "GNU Aspell spell-checker"
 SECTION = "console/utils"
 
-LICENSE = "LGPLv2 | LGPLv2.1"
+LICENSE = "LGPL-2.0-only | LGPL-2.1-only"
 LIC_FILES_CHKSUM = "file://COPYING;md5=7fbc338309ac38fefcd64b04bb903e34"
 
 PR = "r1"

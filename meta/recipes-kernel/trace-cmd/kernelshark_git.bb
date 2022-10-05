@@ -1,5 +1,5 @@
 SUMMARY = "Graphical trace viewer for Ftrace"
-LICENSE = "GPLv2"
+LICENSE = "GPL-2.0-only"
 
 require trace-cmd.inc
 

@@ -7,7 +7,7 @@ DESCRIPTION = "The Present extension provides a way for applications to update t
                mechanism than copying the contents of the source pixmap.\
               "
 
-LICENSE = "GPLv2"
+LICENSE = "GPL-2.0-only"
 
 SRCREV = "bfdc7e052302c79c5803ad95a73c9b63b350c40c"
 PV = "1.1+git${SRCPV}"

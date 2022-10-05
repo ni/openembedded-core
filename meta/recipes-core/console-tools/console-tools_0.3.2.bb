@@ -1,5 +1,5 @@
 SECTION = "base"
-LICENSE = "GPLv2"
+LICENSE = "GPL-2.0-only"
 LIC_FILES_CHKSUM = "file://COPYING.kbd;md5=9b2d91511d3d80d4d20ac6e6b0137fe9"
 SUMMARY = "Allows you to set-up and manipulate the Linux console"
 DESCRIPTION = "Provides tools that enable the set-up and manipulation of the linux console and console-font files."

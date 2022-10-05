@@ -1,4 +1,4 @@
-LICENSE = "GPLv3 & LGPLv2"
+LICENSE = "GPL-3.0-only & LGPL-2.0-only"
 LIC_FILES_CHKSUM = "file://COPYING;md5=d32239bcb673463ab874e80d47fae504 \
                     file://tests/COPYING;md5=d32239bcb673463ab874e80d47fae504 \
                     file://glob/COPYING.LIB;md5=4a770b67e6be0f60da244beb2de0fce4"

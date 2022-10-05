@@ -2,7 +2,7 @@ SUMMARY = "Build Result Compare Script"
 DESCRIPTION = "This package contains scripts to find out if the build result\
 differs to a former build."
 HOMEPAGE = "https://github.com/openSUSE/build-compare"
-LICENSE = "GPLv2"
+LICENSE = "GPL-2.0-only"
 LIC_FILES_CHKSUM = "file://COPYING;md5=751419260aa954499f7abaabaa882bbe"
 
 SRC_URI = "git://github.com/openSUSE/build-compare.git;protocol=https \

@@ -2,7 +2,7 @@ SUMMARY = "Internationalized Domain Name support library"
 DESCRIPTION = "Implementation of the Stringprep, Punycode and IDNA specifications defined by the IETF Internationalized Domain Names (IDN) working group."
 HOMEPAGE = "http://www.gnu.org/software/libidn/"
 SECTION = "libs"
-LICENSE = "(LGPLv2.1+ | LGPLv3) & GPLv3+"
+LICENSE = "(LGPL-2.1-or-later | LGPL-3.0-only) & GPL-3.0-or-later"
 LIC_FILES_CHKSUM = "file://COPYING;md5=df4be47940a91ee69556f5f71eed4aec \
                     file://COPYING.LESSERv2;md5=4fbd65380cdd255951079008b364516c \
                     file://COPYING.LESSERv3;md5=e6a600fd5e1d9cbde2d983680233ad02 \
@@ -31,8 +31,8 @@ SRC_URI[sha256sum] = "44a7aab635bb721ceef6beecc4d49dfd19478325e1b47f3196f7d2acc4
 PACKAGES =+ "idn"
 FILES_idn = "${bindir}/*"
 
-LICENSE_${PN} = "LGPLv2.1+ | LGPLv3"
-LICENSE_idn = "GPLv3+"
+LICENSE_${PN} = "LGPL-2.1-or-later | LGPL-3.0-only"
+LICENSE_idn = "GPL-3.0-or-later"
 
 EXTRA_OECONF = "--disable-csharp"
 

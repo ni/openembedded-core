@@ -9,7 +9,7 @@ Multi-Buffering, SECURITY, SHAPE, SYNC, TOG-CUP, XC-APPGROUP, XC-MISC, \
 XTEST.  In addition a small set of utility functions are also \
 available."
 
-LICENSE = "MIT & MIT-style"
+LICENSE = "MIT & MIT"
 LIC_FILES_CHKSUM = "file://COPYING;md5=86f273291759d0ba2a22585cd1c06c53"
 
 PE = "1"

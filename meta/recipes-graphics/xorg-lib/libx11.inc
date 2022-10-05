@@ -15,7 +15,7 @@ PE = "1"
 PROVIDES = "virtual/libx11"
 
 XORG_PN = "libX11"
-LICENSE = "MIT & MIT-style & BSD"
+LICENSE = "MIT & MIT & BSD"
 LIC_FILES_CHKSUM = "file://COPYING;md5=172255dee66bb0151435b2d5d709fcf7"
 
 DEPENDS += "xproto xextproto xtrans libxcb kbproto inputproto"

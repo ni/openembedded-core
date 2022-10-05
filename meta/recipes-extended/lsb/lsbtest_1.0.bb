@@ -1,7 +1,7 @@
 SUMMARY = "Automates Linux Standard Base (LSB) tests"
 HOMEPAGE = "https://wiki.debian.org/LSBInitScripts"
 SECTION = "console/utils"
-LICENSE = "GPLv2"
+LICENSE = "GPL-2.0-only"
 PR = "r3"
 
 LIC_FILES_CHKSUM = "file://LSB_Test.sh;beginline=3;endline=16;md5=7063bb54b04719df0716b513447f4fc0"

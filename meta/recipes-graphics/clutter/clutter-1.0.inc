@@ -1,6 +1,6 @@
 SUMMARY = "Graphics library for creating hardware-accelerated user interfaces"
 HOMEPAGE = "http://www.clutter-project.org/"
-LICENSE = "LGPLv2.1+"
+LICENSE = "LGPL-2.1-or-later"
 
 inherit clutter ptest-gnome distro_features_check upstream-version-is-even gobject-introspection
 # depends on cogl-1.0 which needs opengl

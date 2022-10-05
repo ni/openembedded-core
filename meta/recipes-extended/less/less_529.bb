@@ -19,7 +19,7 @@ SECTION = "console/utils"
 # --Mark
 #
 
-LICENSE = "GPLv3+ | BSD-2-Clause"
+LICENSE = "GPL-3.0-or-later | BSD-2-Clause"
 LIC_FILES_CHKSUM = "file://COPYING;md5=d32239bcb673463ab874e80d47fae504 \
                     file://LICENSE;md5=2ef3e4b8dafc85612bc5254b8081e234"
 DEPENDS = "ncurses"

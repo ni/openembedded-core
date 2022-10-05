@@ -1,6 +1,6 @@
 SUMMARY = "The canonical example of init scripts"
 SECTION = "base"
-LICENSE = "GPLv2"
+LICENSE = "GPL-2.0-only"
 LIC_FILES_CHKSUM = "file://${WORKDIR}/COPYRIGHT;md5=349c872e0066155e1818b786938876a4"
 
 SRC_URI = "file://skeleton \

@@ -13,7 +13,7 @@ DESCRIPTION = "Text files are nowadays usually encoded in Unicode, and may\
 
 HOMEPAGE = "http://www.gnu.org/software/libunistring/"
 SECTION = "devel"
-LICENSE = "LGPLv3+ | GPLv2"
+LICENSE = "LGPL-3.0-or-later | GPL-2.0-only"
 LIC_FILES_CHKSUM = "file://COPYING.LIB;md5=6a6a8e020838b23406c81b19c1d46df6 \
                     file://README;beginline=45;endline=65;md5=08287d16ba8d839faed8d2dc14d7d6a5 \
                     file://doc/libunistring.texi;md5=287fa6075f78a3c85c1a52b0a92547cd \

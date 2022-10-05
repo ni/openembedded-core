@@ -9,7 +9,7 @@ ACPI tables."
 HOMEPAGE = "http://www.acpica.org/"
 SECTION = "console/tools"
 
-LICENSE = "BSD | GPLv2"
+LICENSE = "BSD | GPL-2.0-only"
 LIC_FILES_CHKSUM = "file://generate/unix/readme.txt;md5=204407e197c1a01154a48f6c6280c3aa"
 
 COMPATIBLE_HOST = "(i.86|x86_64|arm|aarch64).*-linux"

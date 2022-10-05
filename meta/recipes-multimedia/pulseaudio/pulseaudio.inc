@@ -45,7 +45,7 @@ SECTION = "libs/multimedia"
 # of the licenses apply? What a mess. Some people hold the view that libdbus is
 # a system library that is covered by the "special exception" in GPLv2's
 # section 3, and therefore libdbus's GPL license doesn't affect PulseAudio.
-LICENSE = "LGPLv2.1+ & MIT & BSD-3-Clause"
+LICENSE = "LGPL-2.1-or-later & MIT & BSD-3-Clause"
 
 LIC_FILES_CHKSUM = "file://LICENSE;md5=a848e8d03f04976778eab2348b59ed2b \
                     file://GPL;md5=4325afd396febcb659c36b49533135d4 \

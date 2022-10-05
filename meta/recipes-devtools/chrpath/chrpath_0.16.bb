@@ -4,7 +4,7 @@ application looks for libraries) in an application. It does not \
 (yet) allow you to add an rpath if there isn't one already."
 HOMEPAGE = "http://alioth.debian.org/projects/chrpath/"
 BUGTRACKER = "http://alioth.debian.org/tracker/?atid=412807&group_id=31052"
-LICENSE = "GPLv2"
+LICENSE = "GPL-2.0-only"
 LIC_FILES_CHKSUM = "file://COPYING;md5=59530bdf33659b29e73d4adb9f9f6552"
 
 SRC_URI = "${DEBIAN_MIRROR}/main/c/${BPN}/${BPN}_${PV}.orig.tar.gz \

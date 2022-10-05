@@ -1,6 +1,6 @@
 SUMMARY = "Miscellaneous utilities specific to Debian"
 SECTION = "base"
-LICENSE = "GPLv2 & SMAIL_GPL"
+LICENSE = "GPL-2.0-only & SMAIL_GPL"
 LIC_FILES_CHKSUM = "file://debian/copyright;md5=f01a5203d50512fc4830b4332b696a9f"
 
 SRC_URI = "http://snapshot.debian.org/archive/debian/20180129T164727Z/pool/main/d/${BPN}/${BPN}_${PV}.tar.xz"

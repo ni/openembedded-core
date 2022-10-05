@@ -8,7 +8,7 @@ v3 certificates, and other security standards."
 HOMEPAGE = "http://www.mozilla.org/projects/security/pki/nss/"
 SECTION = "libs"
 
-LICENSE = "MPL-2.0 | (MPL-2.0 & GPL-2.0+) | (MPL-2.0 & LGPL-2.1+)"
+LICENSE = "MPL-2.0 | (MPL-2.0 & GPL-2.0-or-later) | (MPL-2.0 & LGPL-2.1-or-later)"
 
 LIC_FILES_CHKSUM = "file://nss/COPYING;md5=3b1e88e1b9c0b5a4b2881d46cce06a18 \
                     file://nss/lib/freebl/mpi/doc/LICENSE;md5=491f158d09d948466afce85d6f1fe18f \

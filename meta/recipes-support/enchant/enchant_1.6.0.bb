@@ -3,7 +3,7 @@ SECTION = "libs"
 HOMEPAGE = "http://www.abisource.com/projects/enchant/"
 BUGTRACKER = "http://bugzilla.abisource.com/enter_bug.cgi?product=Enchant"
 
-LICENSE = "LGPLv2.1+"
+LICENSE = "LGPL-2.1-or-later"
 LIC_FILES_CHKSUM = "file://COPYING.LIB;md5=dfcbabf9131dc9a95febef6753a2958b \
                     file://src/enchant.h;beginline=1;endline=29;md5=8d881caa1d37523567e1d8f726675a18"
 

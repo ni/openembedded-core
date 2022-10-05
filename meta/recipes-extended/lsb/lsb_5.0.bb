@@ -1,7 +1,7 @@
 SUMMARY = "LSB support for OpenEmbedded"
 SECTION = "console/utils"
 HOMEPAGE = "http://prdownloads.sourceforge.net/lsb"
-LICENSE = "GPLv2+"
+LICENSE = "GPL-2.0-or-later"
 
 LSB_CORE = "lsb-core-${TARGET_ARCH}"
 LSB_CORE_x86 = "lsb-core-ia32"

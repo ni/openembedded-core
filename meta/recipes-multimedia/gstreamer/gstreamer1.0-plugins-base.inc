@@ -7,7 +7,7 @@ SRC_URI_append = "\
     file://0004-rtsp-drop-incorrect-reference-to-gstreamer-sdp-in-Ma.patch \
 "
 
-LICENSE = "GPLv2+ & LGPLv2+"
+LICENSE = "GPL-2.0-or-later & LGPL-2.0-or-later"
 
 DEPENDS += "iso-codes util-linux zlib"
 

@@ -4,10 +4,10 @@ DESCRIPTION = "hdparm is a Linux shell utility for viewing \
 and manipulating various IDE drive and driver parameters."
 SECTION = "console/utils"
 
-LICENSE = "BSD & GPLv2"
+LICENSE = "BSD & GPL-2.0-only"
 LICENSE_${PN} = "BSD"
 LICENSE_${PN}-dbg = "BSD"
-LICENSE_wiper = "GPLv2"
+LICENSE_wiper = "GPL-2.0-only"
 
 LIC_FILES_CHKSUM = "file://LICENSE.TXT;md5=495d03e50dc6c89d6a30107ab0df5b03 \
                     file://debian/copyright;md5=a82d7ba3ade9e8ec902749db98c592f3 \

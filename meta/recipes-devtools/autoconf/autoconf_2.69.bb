@@ -2,7 +2,7 @@ require autoconf.inc
 
 PR = "r11"
 
-LICENSE = "GPLv2 & GPLv3"
+LICENSE = "GPL-2.0-only & GPL-3.0-only"
 LIC_FILES_CHKSUM = "file://COPYING;md5=751419260aa954499f7abaabaa882bbe \
 		    file://COPYINGv3;md5=d32239bcb673463ab874e80d47fae504"
 SRC_URI += "file://check-automake-cross-warning.patch \

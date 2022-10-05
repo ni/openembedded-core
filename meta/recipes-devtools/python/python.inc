@@ -1,6 +1,6 @@
 SUMMARY = "The Python Programming Language"
 HOMEPAGE = "http://www.python.org"
-LICENSE = "PSFv2"
+LICENSE = "PSF-2.0"
 SECTION = "devel/python"
 # bump this on every change in contrib/python/generate-manifest-2.7.py
 INC_PR = "r1"

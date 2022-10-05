@@ -6,7 +6,7 @@ disk partitioning, kernel message management, filesystem creation, and system lo
 
 SECTION = "base"
 
-LICENSE = "GPLv2+ & LGPLv2.1+ & BSD"
+LICENSE = "GPL-2.0-or-later & LGPL-2.1-or-later & BSD"
 
 LIC_FILES_CHKSUM = "file://README.licensing;md5=1715f5ee3e01203ca1e1e0b9ee65918c \
                     file://COPYING;md5=b234ee4d69f5fce4486a80fdaf4a4263 \

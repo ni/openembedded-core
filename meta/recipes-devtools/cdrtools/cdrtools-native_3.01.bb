@@ -4,7 +4,7 @@
 SUMMARY = "A set of tools for CD recording, including cdrecord"
 HOMEPAGE = "http://sourceforge.net/projects/cdrtools/"
 SECTION = "console/utils"
-LICENSE = "GPLv2 & CDDL-1.0 & LGPLv2.1+"
+LICENSE = "GPL-2.0-only & CDDL-1.0 & LGPL-2.1-or-later"
 LIC_FILES_CHKSUM = "file://COPYING;md5=32f68170be424c2cd64804337726b312"
 
 SRC_URI = "${SOURCEFORGE_MIRROR}/project/cdrtools/cdrtools-${REALPV}.tar.bz2"

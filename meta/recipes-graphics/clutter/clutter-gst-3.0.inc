@@ -1,6 +1,6 @@
 SUMMARY = "GStreamer integration library for Clutter"
 HOMEPAGE = "http://www.clutter-project.org/"
-LICENSE = "LGPLv2+"
+LICENSE = "LGPL-2.0-or-later"
 
 inherit clutter distro_features_check upstream-version-is-even gobject-introspection
 # depends on clutter-1.0 which depends on cogl-1.0

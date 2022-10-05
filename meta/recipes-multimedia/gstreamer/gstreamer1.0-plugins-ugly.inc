@@ -1,6 +1,6 @@
 require gstreamer1.0-plugins.inc
 
-LICENSE = "GPLv2+ & LGPLv2.1+ & LGPLv2+"
+LICENSE = "GPL-2.0-or-later & LGPL-2.1-or-later & LGPL-2.0-or-later"
 LICENSE_FLAGS = "commercial"
 
 DEPENDS += "gstreamer1.0-plugins-base libid3tag"

@@ -2,7 +2,7 @@ SUMMARY = "A library for bits of crypto UI and parsing etc"
 HOMEPAGE = "http://www.gnome.org/"
 BUGTRACKER = "https://bugzilla.gnome.org/"
 
-LICENSE = "GPLv2"
+LICENSE = "GPL-2.0-only"
 LIC_FILES_CHKSUM = "file://COPYING;md5=55ca817ccb7d5b5b66355690e9abc605"
 
 DEPENDS = "intltool-native gtk+3 p11-kit glib-2.0 libgcrypt \

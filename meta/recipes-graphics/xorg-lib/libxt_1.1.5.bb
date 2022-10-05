@@ -12,7 +12,7 @@ independent of any particular user interface policy or style."
 
 require xorg-lib-common.inc
 
-LICENSE = "MIT & MIT-style"
+LICENSE = "MIT & MIT"
 LIC_FILES_CHKSUM = "file://COPYING;md5=6565b1e0094ea1caae0971cc4035f343"
 
 

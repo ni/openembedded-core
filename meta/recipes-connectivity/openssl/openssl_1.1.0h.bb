@@ -5,7 +5,7 @@ BUGTRACKER = "http://www.openssl.org/news/vulnerabilities.html"
 SECTION = "libs/network"
 
 # "openssl | SSLeay" dual license
-LICENSE = "openssl"
+LICENSE = "OpenSSL"
 LIC_FILES_CHKSUM = "file://LICENSE;md5=d57d511030c9d66ef5f5966bee5a7eff"
 
 BBCLASSEXTEND = "native nativesdk"

@@ -6,7 +6,7 @@ DESCRIPTION = "This package provides the wire protocol for the X Resize, \
 Rotate and Reflect extension.  This extension provides the ability to \
 resize, rotate and reflect the root window of a screen."
 
-LICENSE = "MIT-style"
+LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://COPYING;md5=00426d41bd3d9267cf9bbb2df9323a5e \
                     file://randrproto.h;endline=30;md5=3885957c6048fdf3310ac8ba54ca2c3f"
 

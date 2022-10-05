@@ -13,7 +13,7 @@ DEPENDS_append_class-target = " ${@bb.utils.contains('DISTRO_FEATURES', 'api-doc
 DEPENDS_append_class-target = " vala-native"
 BBCLASSEXTEND = "native"
 HOMEPAGE = "http://vala-project.org"
-LICENSE = "LGPLv2.1"
+LICENSE = "LGPL-2.1-only"
 LIC_FILES_CHKSUM = "file://COPYING;md5=fbc093901857fcd118f065f900982c24"
 
 SHRT_VER = "${@d.getVar('PV').split('.')[0]}.${@d.getVar('PV').split('.')[1]}"

@@ -17,7 +17,7 @@ SRC_URI_append_class-target = " file://0001-Unset-need_charset_alias-when-buildi
 SRC_URI[md5sum] = "a077779db287adf4e12a035029002d28"
 SRC_URI[sha256sum] = "ab2633921a5cd38e48797bf5521ad259bdc4b979078034a3b790d7fec5493fab"
 
-LICENSE = "GPLv3"
+LICENSE = "GPL-3.0-only"
 
 LIC_FILES_CHKSUM = "file://COPYING;md5=d32239bcb673463ab874e80d47fae504\
 	            file://examples/COPYING;md5=4031593b2166d6c47cae282d944a7ede"

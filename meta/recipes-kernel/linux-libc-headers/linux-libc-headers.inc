@@ -1,6 +1,6 @@
 SUMMARY = "Sanitized set of kernel headers for the C library's use"
 SECTION = "devel"
-LICENSE = "GPLv2"
+LICENSE = "GPL-2.0-only"
 
 #########################################################################
 ####                        PLEASE READ 

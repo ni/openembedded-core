@@ -7,7 +7,7 @@ of reliability, speed, portability and with reasonable drop-in compatibility \n\
 to gzip."
 DEPENDS += "lzo"
 
-LICENSE = "GPLv2+"
+LICENSE = "GPL-2.0-or-later"
 LIC_FILES_CHKSUM = "file://COPYING;md5=dfeaf3dc4beef4f5a7bdbc35b197f39e \
                     file://src/lzop.c;beginline=5;endline=21;md5=6797bd3ed0a1a49327b7ebf9366ebd86"
 

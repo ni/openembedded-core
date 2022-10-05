@@ -5,7 +5,7 @@ integration, providing the ability to serialize and deserialize GObject \
 instances to and from JSON data types."
 HOMEPAGE = "http://live.gnome.org/JsonGlib"
 
-LICENSE = "LGPLv2.1"
+LICENSE = "LGPL-2.1-only"
 LIC_FILES_CHKSUM = "file://COPYING;md5=7fbc338309ac38fefcd64b04bb903e34"
 
 DEPENDS = "glib-2.0"

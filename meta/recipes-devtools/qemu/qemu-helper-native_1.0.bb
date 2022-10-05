@@ -1,5 +1,5 @@
 SUMMARY = "Helper utilities needed by the runqemu script"
-LICENSE = "GPLv2"
+LICENSE = "GPL-2.0-only"
 RDEPENDS_${PN} = "qemu-native"
 PR = "r1"
 

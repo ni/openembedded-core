@@ -6,7 +6,7 @@ DESCRIPTION = "This package provides the wire protocol for the X \
 Rendering extension.  This is the basis the image composition within the \
 X window system."
 
-LICENSE = "MIT-style"
+LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://COPYING;md5=f826d99765196352e6122a406cf0d024 \
                     file://renderproto.h;beginline=4;endline=24;md5=3e5e2851dad240b0a3a27c4776b4fd1f"
 

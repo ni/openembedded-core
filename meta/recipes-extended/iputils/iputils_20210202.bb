@@ -4,7 +4,7 @@ tracepath, tracepath6, ping, ping6 and arping."
 HOMEPAGE = "https://github.com/iputils/iputils"
 SECTION = "console/network"
 
-LICENSE = "BSD & GPLv2+"
+LICENSE = "BSD & GPL-2.0-or-later"
 
 LIC_FILES_CHKSUM = "file://LICENSE;md5=55aa8c9fcad0691cef0ecd420361e390"
 

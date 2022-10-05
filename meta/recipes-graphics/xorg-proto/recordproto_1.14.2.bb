@@ -6,7 +6,7 @@ DESCRIPTION = "This package provides the wire protocol for the X Record \
 extension.  This extension is used to record and play back event \
 sequences."
 
-LICENSE = "MIT-style"
+LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://COPYING;md5=575827a0f554bbed332542976d5f3d40 \
                     file://recordproto.h;endline=19;md5=1cbb0dd45a0b060ff833901620a3e738"
 

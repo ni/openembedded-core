@@ -1,5 +1,5 @@
 SUMMARY = "Tools for managing Yocto Project style branched kernels"
-LICENSE = "GPLv2"
+LICENSE = "GPL-2.0-only"
 LIC_FILES_CHKSUM = "file://git/tools/kgit;beginline=5;endline=9;md5=a6c2fa8aef1bda400e2828845ba0d06c"
 
 DEPENDS = "git-native"

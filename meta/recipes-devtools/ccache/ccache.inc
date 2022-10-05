@@ -5,7 +5,7 @@ same compilation is being done again. Supported languages are C, C\+\+, \
 Objective-C and Objective-C++."
 HOMEPAGE = "http://ccache.samba.org"
 SECTION = "devel"
-LICENSE = "GPLv3+"
+LICENSE = "GPL-3.0-or-later"
 
 DEPENDS = "zlib"
 

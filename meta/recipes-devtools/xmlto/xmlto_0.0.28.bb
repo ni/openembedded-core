@@ -1,7 +1,7 @@
 SUMMARY = "A shell-script tool for converting XML files to various formats"
 HOMEPAGE = "https://releases.pagure.org/xmlto/"
 SECTION = "docs/xmlto"
-LICENSE = "GPLv2"
+LICENSE = "GPL-2.0-only"
 
 LIC_FILES_CHKSUM = "file://COPYING;md5=59530bdf33659b29e73d4adb9f9f6552"
 

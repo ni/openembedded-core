@@ -5,7 +5,7 @@ calibration with the kdrive tslib touchscreen driver."
 
 require xorg-lib-common.inc
 
-LICENSE = "MIT-style"
+LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://xcalibrate.h;endline=21;md5=fa572df6439f0f235f2612f370f153d7 \
                     file://xcalibrate.c;endline=21;md5=fa572df6439f0f235f2612f370f153d7"
 

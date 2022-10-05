@@ -5,7 +5,7 @@ SUMMARY = "XCalibrate: Touchscreen calibration headers"
 DESCRIPTION = "This package provides the wire protocol for the \
 Touchscreen calibration extension."
 
-LICENSE = "MIT-style"
+LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://xcalibratewire.h;endline=23;md5=7f86ef7b03cce6c4c9ebd59d20ca485f \
                     file://xcalibrateproto.h;endline=23;md5=e4490491edcc171ca24f98569ee580db"
 

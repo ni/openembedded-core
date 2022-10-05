@@ -1,5 +1,5 @@
 SUMMARY = "Package maintenance system from Debian"
-LICENSE = "GPLv2.0+"
+LICENSE = "GPL-2.0-or-later"
 SECTION = "base"
 
 DEPENDS = "zlib bzip2 perl ncurses"

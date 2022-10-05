@@ -1,7 +1,7 @@
 SUMMARY = "Library for reading extended image information (EXIF) from JPEG files"
 HOMEPAGE = "http://sourceforge.net/projects/libexif"
 SECTION = "libs"
-LICENSE = "LGPLv2.1"
+LICENSE = "LGPL-2.1-only"
 LIC_FILES_CHKSUM = "file://COPYING;md5=243b725d71bb5df4a1e5920b344b86ad"
 
 SRC_URI = "${SOURCEFORGE_MIRROR}/libexif/libexif-${PV}.tar.bz2"

@@ -1,7 +1,7 @@
 SUMMARY = "Key/value database library with extensible hashing"
 HOMEPAGE = "http://www.gnu.org/software/gdbm/"
 SECTION = "libs"
-LICENSE = "GPLv3"
+LICENSE = "GPL-3.0-only"
 LIC_FILES_CHKSUM = "file://COPYING;md5=241da1b9fe42e642cbb2c24d5e0c4d24"
 
 

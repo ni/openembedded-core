@@ -1,7 +1,7 @@
 SUMMARY = "Library for file management"
 HOMEPAGE = "http://pcmanfm.sourceforge.net/"
 
-LICENSE = "LGPLv2+"
+LICENSE = "LGPL-2.0-or-later"
 LIC_FILES_CHKSUM = "file://src/fm-extra.h;beginline=8;endline=21;md5=ef1f84da64b3c01cca447212f7ef6007"
 
 SECTION = "x11/libs"

@@ -1,7 +1,7 @@
 SECTION = "console/utils"
 SUMMARY = "Command line utilities for working with *.desktop files"
 HOMEPAGE = "http://www.freedesktop.org/wiki/Software/desktop-file-utils"
-LICENSE = "GPLv2"
+LICENSE = "GPL-2.0-only"
 
 LIC_FILES_CHKSUM = "file://COPYING;md5=b234ee4d69f5fce4486a80fdaf4a4263"
 DEPENDS = "glib-2.0-native"

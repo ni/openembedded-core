@@ -1,6 +1,6 @@
 require ccache.inc
 
-LICENSE = "GPLv3+"
+LICENSE = "GPL-3.0-or-later"
 LIC_FILES_CHKSUM = "file://LICENSE.txt;md5=dae379a85bb6e9d594773e0aa64876f6"
 
 SRC_URI[md5sum] = "eee58db7cce892febddb989308dc568f"

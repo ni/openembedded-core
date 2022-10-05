@@ -1,7 +1,7 @@
 SUMMARY = "New GNU Portable Threads library"
 HOMEPAGE = "http://www.gnupg.org/software/pth/"
 SECTION = "libs"
-LICENSE = "LGPLv2+"
+LICENSE = "LGPL-2.0-or-later"
 LIC_FILES_CHKSUM = "\
     file://COPYING.LIB;md5=2caced0b25dfefd4c601d92bd15116de\
     "

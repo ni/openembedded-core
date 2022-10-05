@@ -4,9 +4,9 @@ SECTION = "libs"
 
 DEPENDS = "virtual/libintl"
 
-LICENSE = "LGPLv2.1+ & GPLv2+"
-LICENSE_${PN} = "GPLv2+"
-LICENSE_lib${BPN} = "LGPLv2.1+"
+LICENSE = "LGPL-2.1-or-later & GPL-2.0-or-later"
+LICENSE_${PN} = "GPL-2.0-or-later"
+LICENSE_lib${BPN} = "LGPL-2.1-or-later"
 LIC_FILES_CHKSUM = "file://doc/COPYING;md5=2d0aa14b3fce4694e4f615e30186335f \
                     file://attr/attr.c;endline=17;md5=be0403261f0847e5f43ed5b08d19593c \
                     file://libattr/libattr.c;endline=17;md5=7970f77049f8fa1199fff62a7ab724fb"

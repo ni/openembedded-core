@@ -1,7 +1,7 @@
 SUMMARY = "Distributed version control system"
 HOMEPAGE = "http://git-scm.com"
 SECTION = "console/utils"
-LICENSE = "GPLv2"
+LICENSE = "GPL-2.0-only"
 DEPENDS = "openssl curl zlib expat"
 
 PROVIDES_append_class-native = " git-replacement-native"

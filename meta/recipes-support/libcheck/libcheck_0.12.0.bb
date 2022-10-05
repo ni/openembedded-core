@@ -2,7 +2,7 @@ SUMMARY  = "Check - unit testing framework for C code"
 HOMEPAGE = "http://check.sourceforge.net/"
 SECTION = "devel"
 
-LICENSE  = "LGPLv2.1+"
+LICENSE  = "LGPL-2.1-or-later"
 LIC_FILES_CHKSUM = "file://COPYING.LESSER;md5=2d5025d4aa3495befef8f17206a5b0a1"
 
 SRC_URI = "https://github.com/${BPN}/check/releases/download/${PV}/check-${PV}.tar.gz"

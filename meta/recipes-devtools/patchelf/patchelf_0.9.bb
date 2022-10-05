@@ -6,7 +6,7 @@ SRC_URI = "http://nixos.org/releases/${BPN}/${BPN}-${PV}/${BPN}-${PV}.tar.bz2 \
            file://fix-adjusting-startPage.patch \
 "
 
-LICENSE = "GPLv3"
+LICENSE = "GPL-3.0-only"
 SUMMARY = "Tool to allow editing of RPATH and interpreter fields in ELF binaries"
 
 SRC_URI[md5sum] = "d02687629c7e1698a486a93a0d607947"

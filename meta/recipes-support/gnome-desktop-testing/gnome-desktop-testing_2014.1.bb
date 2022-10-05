@@ -1,6 +1,6 @@
 SUMMARY = "Test runner for GNOME-style installed tests"
 HOMEPAGE = "https://wiki.gnome.org/GnomeGoals/InstalledTests"
-LICENSE = "LGPLv2+"
+LICENSE = "LGPL-2.0-or-later"
 
 SRC_URI = "${GNOME_MIRROR}/${BPN}/${PV}/${BPN}-${PV}.tar.xz \
            file://0001-gsystem-subprocess.c-Enable-GNU-extensions-in-system.patch \

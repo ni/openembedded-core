@@ -4,7 +4,7 @@ SECTION = "libs"
 
 DEPENDS = "glib-2.0-native gdk-pixbuf-native librsvg-native"
 
-LICENSE = "LGPLv2 & LGPLv2+ & LGPLv2.1+"
+LICENSE = "LGPL-2.0-only & LGPL-2.0-or-later & LGPL-2.1-or-later"
 
 MAJ_VER = "${@oe.utils.trim_version("${PV}", 2)}"
 

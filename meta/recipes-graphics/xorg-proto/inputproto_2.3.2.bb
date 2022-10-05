@@ -6,7 +6,7 @@ DESCRIPTION = "This package provides the wire protocol for the X Input \
 extension.  The extension supports input devices other then the core X \
 keyboard and pointer."
 
-LICENSE = "MIT & MIT-style"
+LICENSE = "MIT & MIT"
 LIC_FILES_CHKSUM = "file://COPYING;md5=e562cc0f6587b961f032211d8160f31e \
                     file://XI2proto.h;endline=48;md5=1ac1581e61188da2885cc14ff49b20be"
 

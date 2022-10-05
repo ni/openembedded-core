@@ -3,7 +3,7 @@ DESCRIPTION = "Linux tool to diagnose issues with power consumption and power ma
 HOMEPAGE = "http://01.org/powertop/"
 BUGTRACKER = "http://bugzilla.lesswatts.org/"
 DEPENDS = "ncurses libnl pciutils"
-LICENSE = "GPLv2"
+LICENSE = "GPL-2.0-only"
 LIC_FILES_CHKSUM = "file://COPYING;md5=12f884d2ae1ff87c09e5b7ccc2c4ca7e"
 
 SRC_URI = "http://01.org/sites/default/files/downloads/powertop/powertop-v${PV}.tar.gz \

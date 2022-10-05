@@ -1,7 +1,7 @@
 SUMMARY = "Python bindings for GStreamer 1.0"
 HOMEPAGE = "http://cgit.freedesktop.org/gstreamer/gst-python/"
 SECTION = "multimedia"
-LICENSE = "LGPLv2.1"
+LICENSE = "LGPL-2.1-only"
 
 DEPENDS = "gstreamer1.0 python3-pygobject"
 RDEPENDS_${PN} += "gstreamer1.0 python3-pygobject"

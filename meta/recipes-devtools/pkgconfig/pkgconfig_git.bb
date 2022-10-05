@@ -5,7 +5,7 @@ HOMEPAGE = "http://pkg-config.freedesktop.org/wiki/"
 BUGTRACKER = "http://bugs.freedesktop.org/buglist.cgi?product=pkg-config"
 SECTION = "console/utils"
 
-LICENSE = "GPLv2+"
+LICENSE = "GPL-2.0-or-later"
 LIC_FILES_CHKSUM = "file://COPYING;md5=b234ee4d69f5fce4486a80fdaf4a4263"
 
 SRCREV = "edf8e6f0ea77ede073f07bff0d2ae1fc7a38103b"

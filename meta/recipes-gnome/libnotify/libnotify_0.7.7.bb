@@ -1,7 +1,7 @@
 SUMMARY = "Library for sending desktop notifications to a notification daemon"
 HOMEPAGE = "http://www.gnome.org"
 SECTION = "libs"
-LICENSE = "LGPLv2.1"
+LICENSE = "LGPL-2.1-only"
 LIC_FILES_CHKSUM = "file://COPYING;md5=7fbc338309ac38fefcd64b04bb903e34"
 
 DEPENDS = "dbus gtk+3 dbus-glib"

@@ -1,5 +1,5 @@
 SUMMARY = "Advanced front-end for dpkg"
-LICENSE = "GPLv2.0+"
+LICENSE = "GPL-2.0-or-later"
 SECTION = "base"
 
 SRC_URI = "http://archive.ubuntu.com/ubuntu/pool/main/a/${BPN}/${BPN}_${PV}.tar.xz \

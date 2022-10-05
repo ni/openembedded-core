@@ -1,7 +1,7 @@
 SUMMARY = "Syntax highlight utility"
 DESCRIPTION = "Source-highlight converts source code to formatted text with syntax highlighting."
 HOMEPAGE = "https://www.gnu.org/software/src-highlite/"
-LICENSE = "GPLv3"
+LICENSE = "GPL-3.0-only"
 LIC_FILES_CHKSUM = "file://COPYING;md5=ff95bfe019feaf92f524b73dd79e76eb"
 
 SRC_URI = "${GNU_MIRROR}/src-highlite/${BPN}-${PV}.tar.gz \

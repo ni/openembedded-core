@@ -3,7 +3,7 @@
 
 SUMMARY = "Glibc hierarchical argument parsing standalone library"
 HOMEPAGE = "http://www.lysator.liu.se/~nisse/misc/"
-LICENSE = "LGPL-2.1"
+LICENSE = "LGPL-2.1-only"
 LIC_FILES_CHKSUM = "file://argp.h;beginline=1;endline=20;md5=008b7e53dea6f9e1d9fdef0d9cf3184a"
 SECTION = "libs"
 

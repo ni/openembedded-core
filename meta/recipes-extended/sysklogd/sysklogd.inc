@@ -3,9 +3,9 @@ DESCRIPTION = "The sysklogd package implements two system log daemons: syslogd, 
 HOMEPAGE = "http://www.infodrom.org/projects/sysklogd/"
 SECTION = "base"
 
-LICENSE = "GPLv2+ & BSD"
+LICENSE = "GPL-2.0-or-later & BSD"
 LICENSE_syslogd = "BSD"
-LICENSE_klogd = "GPLv2+"
+LICENSE_klogd = "GPL-2.0-or-later"
 LIC_FILES_CHKSUM = "file://COPYING;md5=8ca43cbc842c2336e835926c2166c28b \
                     file://syslogd.c;beginline=2;endline=15;md5=77ffb2fec48c46d7ca0abb2d5813e7fd \
                     file://klogd.c;beginline=2;endline=19;md5=7e87ed0ae6142de079bce738c10c899d \

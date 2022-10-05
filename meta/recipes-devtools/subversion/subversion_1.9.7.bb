@@ -3,7 +3,7 @@ SECTION = "console/network"
 DEPENDS = "apr-util serf sqlite3 file"
 DEPENDS_append_class-native = " file-replacement-native"
 RDEPENDS_${PN} = "serf"
-LICENSE = "Apache-2"
+LICENSE = "Apache-2.0"
 HOMEPAGE = "http://subversion.tigris.org"
 
 BBCLASSEXTEND = "native"

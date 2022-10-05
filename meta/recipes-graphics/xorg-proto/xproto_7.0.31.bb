@@ -5,7 +5,7 @@ SUMMARY = "Xlib: C Language X interface headers"
 DESCRIPTION = "This package provides the basic headers for the X Window \
 System."
 
-LICENSE = "MIT & MIT-style"
+LICENSE = "MIT & MIT"
 LIC_FILES_CHKSUM = "file://COPYING;md5=b9e051107d5628966739a0b2e9b32676"
 
 PE = "1"

@@ -1,7 +1,7 @@
 SUMMARY = "SysV init scripts which are only used in an LSB image"
 HOMEPAGE = "https://wiki.debian.org/LSBInitScripts"
 SECTION = "base"
-LICENSE = "GPLv2"
+LICENSE = "GPL-2.0-only"
 DEPENDS = "popt glib-2.0"
 
 RPROVIDES_${PN} += "initd-functions"

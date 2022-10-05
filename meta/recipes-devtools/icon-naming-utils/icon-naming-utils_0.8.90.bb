@@ -8,7 +8,7 @@ icon files appropriate to the desktop environment you use. The Icon \
 Naming Specification provides a standard list of common icon contexts \
 and names that can be used to make icon themes work in a desktop \
 environment or application that implements the naming specification. "
-LICENSE = "GPLv2"
+LICENSE = "GPL-2.0-only"
 DEPENDS = "libxml-simple-perl-native"
 PR = "r5"
 

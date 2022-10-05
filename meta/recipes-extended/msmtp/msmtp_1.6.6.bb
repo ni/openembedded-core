@@ -3,7 +3,7 @@ DESCRIPTION = "A sendmail replacement for use in MTAs like mutt"
 HOMEPAGE = "http://msmtp.sourceforge.net/"
 SECTION = "console/network"
 
-LICENSE = "GPLv3"
+LICENSE = "GPL-3.0-only"
 DEPENDS = "zlib gnutls"
 
 #COPYING or Licence
