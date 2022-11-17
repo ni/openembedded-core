@@ -67,11 +67,11 @@ def add_package_and_files(d):
     for pn in packages.split():
         if pn == pn_lic:
             continue
-        rrecommends_pn = d.getVar('RRECOMMENDS_' + pn)
+        rrecommends_pn = d.getVar('RRECOMMENDS:' + pn)
         if rrecommends_pn:
-            d.setVar('RRECOMMENDS_' + pn, "%s %s" % (pn_lic, rrecommends_pn))
+            d.setVar('RRECOMMENDS:' + pn, "%s %s" % (pn_lic, rrecommends_pn))
         else:
-            d.setVar('RRECOMMENDS_' + pn, "%s" % (pn_lic))
+            d.setVar('RRECOMMENDS:' + pn, "%s" % (pn_lic))
 
 def copy_license_files(lic_files_paths, destdir):
     import shutil
