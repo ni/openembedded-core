@@ -3,7 +3,7 @@ LICENSE = "MIT"
 
 PR = "r7"
 
-python() {
+do_populate_sdk:prepend() {
     # It does not make sense to build a toolchain when BUILD_IMAGES_FROM_FEEDS
     # is enabled. The SDK packages for the given SDK_MACHINE are built and
     # indexed as part of this recipe, and are not available in any feed.
