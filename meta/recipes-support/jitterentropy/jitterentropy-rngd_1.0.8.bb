@@ -14,7 +14,7 @@ LIC_FILES_CHKSUM = "file://COPYING;md5=e52365752b36cfcd7f9601d80de7d8c6 \
                     file://COPYING.gplv2;md5=eb723b61539feef013de476e68b5c50a \
 "
 
-SRC_URI = "git://github.com/smuellerDD/jitterentropy-rngd.git;protocol=https \
+SRC_URI = "git://github.com/smuellerDD/jitterentropy-rngd.git;protocol=https;branch=master \
            file://0001-Makefile-support-cross-compiling.patch \
            file://init-jitterentropy-rngd \
 "
