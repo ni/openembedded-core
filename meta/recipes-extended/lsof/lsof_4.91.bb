@@ -22,6 +22,15 @@ LOCALSRC = "file://${WORKDIR}/lsof_${PV}/lsof_${PV}_src.tar"
 
 S = "${WORKDIR}/lsof_${PV}_src"
 
+
+inherit update-alternatives
+
+ALTERNATIVE_${PN} = "lsof"
+ALTERNATIVE_LINK_NAME[lsof] = "${sbindir}/lsof"
+# Make our priority higher than busybox
+ALTERNATIVE_PRIORITY = "100"
+
+
 python do_unpack () {
     if not bb.data.inherits_class('externalsrc', d) or not d.getVar('EXTERNALSRC'):
         # temporarily change S for unpack of lsof_${PV}
