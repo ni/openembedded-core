@@ -112,6 +112,7 @@ PTESTS_PROBLEMS:append:riscv64 = "valgrind-ptest"
 #    numactl-ptest \ # qemu not (yet) configured for numa; all tests are skipped
 #    libseccomp-ptest \ #  tests failed: 38; add to slow tests once addressed
 #    python3-numpy-ptest \ # requires even more RAM and (possibly) disk space; multiple failures
+#    run-postinsts-ptest \ # depends upon bash-ptest which is non-deterministic by design
 
 PTESTS_PROBLEMS = "\
     ruby-ptest \
@@ -125,4 +126,5 @@ PTESTS_PROBLEMS = "\
     libseccomp-ptest \
     numactl-ptest \
     python3-numpy-ptest \
+    run-postinsts-ptest \
 "
