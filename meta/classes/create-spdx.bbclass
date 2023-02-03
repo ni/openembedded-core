@@ -907,8 +907,15 @@ def combine_spdx(d, rootfs_name, rootfs_deploydir, rootfs_spdxid, packages):
     doc.packages.append(image)
 
     for name in sorted(packages.keys()):
-        pkg_spdx_path = deploy_dir_spdx / "packages" / (name + ".spdx.json")
-        pkg_doc, pkg_doc_sha1 = oe.sbom.read_doc(pkg_spdx_path)
+        try:
+            pkg_spdx_path = deploy_dir_spdx / "packages" / (name + ".spdx.json")
+            pkg_doc, pkg_doc_sha1 = oe.sbom.read_doc(pkg_spdx_path)
+        except FileNotFoundError:
+            if d.getVar('BUILD_IMAGES_FROM_FEEDS') == "1":
+                bb.warn("spdx: %s has no spdx available. Skipping." % name)
+                continue
+            else:
+                raise
 
         for p in pkg_doc.packages:
             if p.name == name:
