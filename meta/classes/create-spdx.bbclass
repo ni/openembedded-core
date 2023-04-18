@@ -882,6 +882,7 @@ def combine_spdx(d, rootfs_name, rootfs_deploydir, rootfs_spdxid, packages):
     from datetime import timezone, datetime
     from pathlib import Path
     import tarfile
+    import zipfile
     import bb.compress.zstd
 
     creation_time = datetime.now(tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
@@ -961,8 +962,9 @@ def combine_spdx(d, rootfs_name, rootfs_deploydir, rootfs_spdxid, packages):
     index = {"documents": []}
 
     spdx_tar_path = rootfs_deploydir / (rootfs_name + ".spdx.tar.zst")
+    spdx_zip_path = rootfs_deploydir / (rootfs_name + ".spdx.zip")
     with bb.compress.zstd.open(spdx_tar_path, "w", num_threads=num_threads) as f:
-        with tarfile.open(fileobj=f, mode="w|") as tar:
+        with tarfile.open(fileobj=f, mode="w|") as tar, zipfile.ZipFile(spdx_zip_path, "w") as zipf:
             def collect_spdx_document(path):
                 nonlocal tar
                 nonlocal deploy_dir_spdx
@@ -995,6 +997,7 @@ def combine_spdx(d, rootfs_name, rootfs_deploydir, rootfs_spdxid, packages):
                         info.mtime = int(source_date_epoch)
 
                     tar.addfile(info, f)
+                    zipf.write(path, arcname=info.name)
 
                     index["documents"].append({
                         "filename": info.name,
