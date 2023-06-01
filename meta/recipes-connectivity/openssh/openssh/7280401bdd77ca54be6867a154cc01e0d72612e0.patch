@@ -9,8 +9,7 @@ OpenSSL 1.1.1 or greater
 with/ok dtucker@
 
 Upstream-Status: Backport [https://github.com/openssh/openssh-portable/commit/7280401bdd77ca54be6867a154cc01e0d72612e0]
-Comment: Hunk are refreshed, removed couple of hunks from configure.ac as hunk code is not prasent
-and backported to the existing code.
+Comment: Hunks are refreshed.
 Signed-off-by: Riyaz Khan <Riyaz.Khan@kpit.com>
 
 ---
@@ -26,31 +25,33 @@ diff --git a/.github/workflows/c-cpp.yml b/.github/workflows/c-cpp.yml
 index 3d9aa22dba5..d299a32468d 100644
 --- a/.github/workflows/c-cpp.yml
 +++ b/.github/workflows/c-cpp.yml
-@@ -40,18 +40,11 @@
-           - { os: ubuntu-20.04, configs: tcmalloc }
-           - { os: ubuntu-20.04, configs: musl }
-           - { os: ubuntu-latest, configs: libressl-master }
--          - { os: ubuntu-latest, configs: libressl-2.2.9 }
--          - { os: ubuntu-latest, configs: libressl-2.8.3 }
--          - { os: ubuntu-latest, configs: libressl-3.0.2 }
-           - { os: ubuntu-latest, configs: libressl-3.2.6 }
-           - { os: ubuntu-latest, configs: libressl-3.3.4 }
-           - { os: ubuntu-latest, configs: libressl-3.4.1 }
-           - { os: ubuntu-latest, configs: openssl-master }
-           - { os: ubuntu-latest, configs: openssl-noec }
--          - { os: ubuntu-latest, configs: openssl-1.0.1 }
--          - { os: ubuntu-latest, configs: openssl-1.0.1u }
--          - { os: ubuntu-latest, configs: openssl-1.0.2u }
--          - { os: ubuntu-latest, configs: openssl-1.1.0h }
-           - { os: ubuntu-latest, configs: openssl-1.1.1 }
-           - { os: ubuntu-latest, configs: openssl-1.1.1k }
-           - { os: ubuntu-latest, configs: openssl-3.0.0 }
+@@ -47,9 +47,6 @@ jobs:
+           - { target: ubuntu-20.04, config: tcmalloc }
+           - { target: ubuntu-20.04, config: musl }
+           - { target: ubuntu-latest, config: libressl-master }
+-          - { target: ubuntu-latest, config: libressl-2.2.9 }
+-          - { target: ubuntu-latest, config: libressl-2.8.3 }
+-          - { target: ubuntu-latest, config: libressl-3.0.2 }
+           - { target: ubuntu-latest, config: libressl-3.2.6 }
+           - { target: ubuntu-latest, config: libressl-3.3.6 }
+           - { target: ubuntu-latest, config: libressl-3.4.3 }
+@@ -58,10 +55,6 @@ jobs:
+           - { target: ubuntu-latest, config: libressl-3.7.0 }
+           - { target: ubuntu-latest, config: openssl-master }
+           - { target: ubuntu-latest, config: openssl-noec }
+-          - { target: ubuntu-latest, config: openssl-1.0.1 }
+-          - { target: ubuntu-latest, config: openssl-1.0.1u }
+-          - { target: ubuntu-latest, config: openssl-1.0.2u }
+-          - { target: ubuntu-latest, config: openssl-1.1.0h }
+           - { target: ubuntu-latest, config: openssl-1.1.1 }
+           - { target: ubuntu-latest, config: openssl-1.1.1k }
+           - { target: ubuntu-latest, config: openssl-1.1.1n }
 diff --git a/INSTALL b/INSTALL
 index 68b15e13190..f99d1e2a809 100644
 --- a/INSTALL
 +++ b/INSTALL
 @@ -21,12 +21,8 @@ https://zlib.net/
-
+ 
  libcrypto from either of LibreSSL or OpenSSL.  Building without libcrypto
  is supported but severely restricts the available ciphers and algorithms.
 - - LibreSSL (https://www.libressl.org/)
@@ -61,7 +62,7 @@ index 68b15e13190..f99d1e2a809 100644
 -1.1.0g can't be used.
 + - LibreSSL (https://www.libressl.org/) 3.1.0 or greater
 + - OpenSSL (https://www.openssl.org) 1.1.1 or greater
-
+ 
  LibreSSL/OpenSSL should be compiled as a position-independent library
  (i.e. -fPIC, eg by configuring OpenSSL as "./config [options] -fPIC"
 diff --git a/cipher-aes.c b/cipher-aes.c
@@ -69,7 +70,7 @@ index 8b101727284..87c763353d8 100644
 --- a/cipher-aes.c
 +++ b/cipher-aes.c
 @@ -69,7 +69,7 @@ ssh_rijndael_init(EVP_CIPHER_CTX *ctx, const u_char *key, const u_char *iv,
-
+ 
  static int
  ssh_rijndael_cbc(EVP_CIPHER_CTX *ctx, u_char *dest, const u_char *src,
 -    LIBCRYPTO_EVP_INL_TYPE len)
@@ -81,18 +82,18 @@ diff --git a/configure.ac b/configure.ac
 index 22fee70f604..1c0ccdf19c5 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -2744,42 +2744,40 @@
-	#include <openssl/crypto.h>
-	#define DATA "conftest.ssllibver"
-		]], [[
+@@ -2802,42 +2802,40 @@ if test "x$openssl" = "xyes" ; then
+ 	#include <openssl/crypto.h>
+ 	#define DATA "conftest.ssllibver"
+ 		]], [[
 -		FILE *fd;
 -		int rc;
 +		FILE *f;
-
+ 
 -		fd = fopen(DATA,"w");
 -		if(fd == NULL)
 +		if ((f = fopen(DATA, "w")) == NULL)
-			exit(1);
+ 			exit(1);
 -#ifndef OPENSSL_VERSION
 -# define OPENSSL_VERSION SSLEAY_VERSION
 -#endif
@@ -104,7 +105,7 @@ index 22fee70f604..1c0ccdf19c5 100644
 -#endif
 -		if ((rc = fprintf(fd, "%08lx (%s)\n",
 +		if (fprintf(f, "%08lx (%s)",
-		    (unsigned long)OpenSSL_version_num(),
+ 		    (unsigned long)OpenSSL_version_num(),
 -		    OpenSSL_version(OPENSSL_VERSION))) < 0)
 +		    OpenSSL_version(OPENSSL_VERSION)) < 0)
 +			exit(1);
@@ -113,15 +114,15 @@ index 22fee70f604..1c0ccdf19c5 100644
 +			exit(1);
 +#endif
 +		if (fputc('\n', f) == EOF || fclose(f) == EOF)
-			exit(1);
+ 			exit(1);
 -
-		exit(0);
-		]])],
-		[
+ 		exit(0);
+ 		]])],
+ 		[
 -			ssl_library_ver=`cat conftest.ssllibver`
 +			sslver=`cat conftest.ssllibver`
 +			ssl_showver=`echo "$sslver" | sed 's/ libressl-.*//'`
-			# Check version is supported.
+ 			# Check version is supported.
 -			case "$ssl_library_ver" in
 -			10000*|0*)
 -				AC_MSG_ERROR([OpenSSL >= 1.0.1 required (have "$ssl_library_ver")])
@@ -133,8 +134,8 @@ index 22fee70f604..1c0ccdf19c5 100644
 +			case "$sslver" in
 +			100*|10100*) # 1.0.x, 1.1.0x
 +				AC_MSG_ERROR([OpenSSL >= 1.1.1 required (have "$ssl_showver")])
-				;;
-			101*)   ;; # 1.1.x
+ 				;;
+ 			101*)   ;; # 1.1.x
 -			200*)   ;; # LibreSSL
 +			200*)   # LibreSSL
 +				lver=`echo "$sslver" | sed 's/.*libressl-//'`
@@ -145,12 +146,12 @@ index 22fee70f604..1c0ccdf19c5 100644
 +				*) ;;	# Assume all other versions are good.
 +				esac
 +				;;
-			300*)   ;; # OpenSSL 3
-			301*)   ;; # OpenSSL development branch.
-		        *)
-@@ -2781,10 +2781,10 @@
- 			300*)   ;; # OpenSSL 3
- 			301*)   ;; # OpenSSL development branch.
+ 			300*)
+ 				# OpenSSL 3; we use the 1.1x API
+ 				CPPFLAGS="$CPPFLAGS -DOPENSSL_API_COMPAT=0x10100000L"
+@@ -2847,10 +2845,10 @@ if test "x$openssl" = "xyes" ; then
+ 				CPPFLAGS="$CPPFLAGS -DOPENSSL_API_COMPAT=0x10100000L"
+ 				;;
  		        *)
 -				AC_MSG_ERROR([Unknown/unsupported OpenSSL version ("$ssl_library_ver")])
 +				AC_MSG_ERROR([Unknown/unsupported OpenSSL version ("$ssl_showver")])
@@ -161,7 +162,16 @@ index 22fee70f604..1c0ccdf19c5 100644
  		],
  		[
  			AC_MSG_RESULT([not found])
-@@ -2804,9 +2804,6 @@
+@@ -2863,7 +2861,7 @@ if test "x$openssl" = "xyes" ; then
+ 
+ 	case "$host" in
+ 	x86_64-*)
+-		case "$ssl_library_ver" in
++		case "$sslver" in
+ 		3000004*)
+ 			AC_MSG_ERROR([OpenSSL 3.0.4 has a potential RCE in its RSA implementation (CVE-2022-2274)])
+ 			;;
+@@ -2879,9 +2877,6 @@ if test "x$openssl" = "xyes" ; then
  	#include <openssl/opensslv.h>
  	#include <openssl/crypto.h>
  		]], [[
@@ -171,10 +181,10 @@ index 22fee70f604..1c0ccdf19c5 100644
  		exit(OpenSSL_version_num() == OPENSSL_VERSION_NUMBER ? 0 : 1);
  		]])],
  		[
-@@ -2881,44 +2878,13 @@
+@@ -2955,44 +2950,13 @@ if test "x$openssl" = "xyes" ; then
  	    )
  	)
-
+ 
 -	# LibreSSL/OpenSSL 1.1x API
 +	# LibreSSL/OpenSSL API differences
  	AC_CHECK_FUNCS([ \
@@ -215,17 +225,17 @@ index 22fee70f604..1c0ccdf19c5 100644
 -		EVP_MD_CTX_free \
 -		EVP_chacha20 \
  	])
-
+ 
  	if test "x$openssl_engine" = "xyes" ; then
-@@ -3040,8 +3006,8 @@
- 	fi
- 	AC_CHECK_FUNCS([crypt DES_crypt])
+@@ -3050,8 +3014,8 @@ if test "x$openssl" = "xyes" ; then
+ 		]
+ 	)
  
 -	# Check for SHA256, SHA384 and SHA512 support in OpenSSL
 -	AC_CHECK_FUNCS([EVP_sha256 EVP_sha384 EVP_sha512])
 +	# Check for various EVP support in OpenSSL
 +	AC_CHECK_FUNCS([EVP_sha256 EVP_sha384 EVP_sha512 EVP_chacha20])
-
+ 
  	# Check complete ECC support in OpenSSL
  	AC_MSG_CHECKING([whether OpenSSL has NID_X9_62_prime256v1])
 diff --git a/openbsd-compat/libressl-api-compat.c b/openbsd-compat/libressl-api-compat.c
@@ -245,21 +255,21 @@ index 498180dc894..59be17397c5 100644
 - * This package is an SSL implementation written
 - * by Eric Young (eay@cryptsoft.com).
 - * The implementation was written so as to conform with Netscapes SSL.
-- * 
+- *
 - * This library is free for commercial and non-commercial use as long as
 - * the following conditions are aheared to.  The following conditions
 - * apply to all code found in this distribution, be it the RC4, RSA,
 - * lhash, DES, etc., code; not just the SSL code.  The SSL documentation
 - * included with this distribution is covered by the same copyright terms
 - * except that the holder is Tim Hudson (tjh@cryptsoft.com).
-- * 
+- *
 - * Copyright remains Eric Young's, and as such any Copyright notices in
 - * the code are not to be removed.
 - * If this package is used in a product, Eric Young should be given attribution
 - * as the author of the parts of the library used.
 - * This can be in the form of a textual message at program startup or
 - * in documentation (online or textual) provided with the package.
-- * 
+- *
 - * Redistribution and use in source and binary forms, with or without
 - * modification, are permitted provided that the following conditions
 - * are met:
@@ -274,10 +284,10 @@ index 498180dc894..59be17397c5 100644
 - *     Eric Young (eay@cryptsoft.com)"
 - *    The word 'cryptographic' can be left out if the rouines from the library
 - *    being used are not cryptographic related :-).
-- * 4. If you include any Windows specific code (or a derivative thereof) from 
+- * 4. If you include any Windows specific code (or a derivative thereof) from
 - *    the apps directory (application code) you must include an acknowledgement:
 - *    "This product includes software written by Tim Hudson (tjh@cryptsoft.com)"
-- * 
+- *
 - * THIS SOFTWARE IS PROVIDED BY ERIC YOUNG ``AS IS'' AND
 - * ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
 - * IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
@@ -289,7 +299,7 @@ index 498180dc894..59be17397c5 100644
 - * LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY
 - * OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF
 - * SUCH DAMAGE.
-- * 
+- *
 - * The licence and distribution terms for any publically available version or
 - * derivative of this code cannot be changed.  i.e. this code cannot simply be
 - * copied and put under another distribution licence
@@ -310,7 +320,7 @@ index 498180dc894..59be17397c5 100644
 - * are met:
 - *
 - * 1. Redistributions of source code must retain the above copyright
-- *    notice, this list of conditions and the following disclaimer. 
+- *    notice, this list of conditions and the following disclaimer.
 - *
 - * 2. Redistributions in binary form must reproduce the above copyright
 - *    notice, this list of conditions and the following disclaimer in
@@ -366,7 +376,7 @@ index 498180dc894..59be17397c5 100644
 @@ -147,192 +23,7 @@
  #include <stdlib.h>
  #include <string.h>
-
+ 
 -#include <openssl/err.h>
 -#include <openssl/bn.h>
 -#include <openssl/dsa.h>
@@ -553,13 +563,13 @@ index 498180dc894..59be17397c5 100644
 -	return 1;
 -}
 -#endif /* HAVE_RSA_SET0_FACTORS */
-
+ 
  #ifndef HAVE_EVP_CIPHER_CTX_GET_IV
  int
 @@ -392,249 +83,4 @@ EVP_CIPHER_CTX_set_iv(EVP_CIPHER_CTX *ctx, const unsigned char *iv, size_t len)
  }
  #endif /* HAVE_EVP_CIPHER_CTX_SET_IV */
-
+ 
 -#ifndef HAVE_DSA_SIG_GET0
 -void
 -DSA_SIG_get0(const DSA_SIG *sig, const BIGNUM **pr, const BIGNUM **ps)
@@ -813,7 +823,7 @@ index 61a69dd56eb..d0dd2c3450d 100644
 @@ -33,26 +33,13 @@
  int ssh_compatible_openssl(long, long);
  void ssh_libcrypto_init(void);
-
+ 
 -#if (OPENSSL_VERSION_NUMBER < 0x1000100fL)
 -# error OpenSSL 1.0.1 or greater is required
 +#if (OPENSSL_VERSION_NUMBER < 0x10100000L)
@@ -841,12 +851,12 @@ index 61a69dd56eb..d0dd2c3450d 100644
 +#  error LibreSSL 3.1.0 or greater is required
 +# endif
  #endif
-
+ 
  #ifndef OPENSSL_RSA_MAX_MODULUS_BITS
 @@ -68,25 +55,6 @@ void ssh_libcrypto_init(void);
  # endif
  #endif
-
+ 
 -/* LibreSSL/OpenSSL 1.1x API compat */
 -#ifndef HAVE_DSA_GET0_PQG
 -void DSA_get0_pqg(const DSA *d, const BIGNUM **p, const BIGNUM **q,
@@ -872,7 +882,7 @@ index 61a69dd56eb..d0dd2c3450d 100644
 @@ -101,112 +69,5 @@ int EVP_CIPHER_CTX_set_iv(EVP_CIPHER_CTX *ctx,
      const unsigned char *iv, size_t len);
  #endif /* HAVE_EVP_CIPHER_CTX_SET_IV */
-
+ 
 -#ifndef HAVE_RSA_GET0_KEY
 -void RSA_get0_key(const RSA *r, const BIGNUM **n, const BIGNUM **e,
 -    const BIGNUM **d);
@@ -982,3 +992,4 @@ index 61a69dd56eb..d0dd2c3450d 100644
 -
  #endif /* WITH_OPENSSL */
  #endif /* _OPENSSL_COMPAT_H */
+
