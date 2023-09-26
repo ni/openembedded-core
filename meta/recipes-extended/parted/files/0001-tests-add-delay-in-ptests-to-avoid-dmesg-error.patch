@@ -1,0 +1,55 @@
+From 41ebb6af13d3d3e45d6037398260c9264ecc297b Mon Sep 17 00:00:00 2001
+From: Dylan Turner <dylan.turner@ni.com>
+Upstream-Status: Inappropriate other
+Date: Tue, 26 Sep 2023 01:47:34 -0500
+Subject: [PATCH] tests: add delay in ptests to avoid dmesg error
+
+Signed-off-by: Dylan Turner <dylan.turner@ni.com>
+---
+ tests/t1104-remove-and-add-partition.sh | 3 +++
+ tests/t8000-loop.sh                     | 2 ++
+ 2 files changed, 5 insertions(+)
+
+diff --git a/tests/t1104-remove-and-add-partition.sh b/tests/t1104-remove-and-add-partition.sh
+index 657b180..c6cb6c3 100644
+--- a/tests/t1104-remove-and-add-partition.sh
++++ b/tests/t1104-remove-and-add-partition.sh
+@@ -36,15 +36,18 @@ require_partitionable_loop_device_ $d1
+ 
+ # create one big partition
+ parted -s $d1 mklabel msdos mkpart primary ext2 1m 10m || fail=1
++sleep 0.5
+ 
+ # save this table
+ dd if=$d1 of=saved count=1 || fail=1
+ 
+ # create two small partitions
+ parted -s $d1 mklabel msdos mkpart primary ext2 1m 5m mkpart primary ext2 5m 10m || fail=1
++sleep 0.5
+ 
+ # restore first table and make sure partprobe works
+ dd if=saved of=$d1 || fail=1
+ partprobe $d1 || fail=1
++sleep 0.5
+ 
+ Exit $fail
+diff --git a/tests/t8000-loop.sh b/tests/t8000-loop.sh
+index 793e279..7f37d36 100755
+--- a/tests/t8000-loop.sh
++++ b/tests/t8000-loop.sh
+@@ -35,10 +35,12 @@ require_partitionable_loop_device_ $d1
+ 
+ # Expect this to succeed.
+ parted -s $d1 mklabel msdos > err 2>&1 || fail=1
++sleep 0.5
+ compare /dev/null err || fail=1     # expect no output
+ 
+ # Create a partition
+ parted -s $d1 mkpart primary 1 10 > err 2>&1 || fail=1
++sleep 0.5
+ compare /dev/null err || fail=1     # expect no output
+ 
+ Exit $fail
+-- 
+2.40.1
+

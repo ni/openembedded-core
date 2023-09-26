@@ -8,6 +8,7 @@ DEPENDS = "ncurses util-linux virtual/libiconv"
 
 SRC_URI = "${GNU_MIRROR}/parted/parted-${PV}.tar.xz \
            file://fix-doc-mandir.patch \
+           file://0001-tests-add-delay-in-ptests-to-avoid-dmesg-error.patch \
            file://run-ptest \
            file://check-vfat.patch \
            "
