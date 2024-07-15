@@ -30,7 +30,7 @@ do_install:append() {
 FILES:${PN} += " ${libdir}/X11/fonts ${datadir}"
 
 PACKAGE_WRITE_DEPS += "mkfontdir-native mkfontscale-native"
-pkg_postinst:${PN} () {
+pkg_postinst_ontarget:${PN} () {
         for fontdir in `find $D/usr/lib/X11/fonts -type d`; do
                 mkfontdir $fontdir
                 mkfontscale $fontdir
