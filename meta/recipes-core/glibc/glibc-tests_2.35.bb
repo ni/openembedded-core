@@ -17,7 +17,6 @@ python __anonymous() {
        d.setVar("PACKAGES", "${PN} ${PN}-ptest")
 
        d.setVar("PROVIDES", "${PN} ${PN}-ptest")
-       d.setVar("RPROVIDES", "${PN} ${PN}-ptest")
 
        bbclassextend = d.getVar("BBCLASSEXTEND").replace("nativesdk", "").strip()
        d.setVar("BBCLASSEXTEND", bbclassextend)
@@ -29,7 +28,8 @@ python __anonymous() {
 # Remove any leftovers from original glibc recipe
 RPROVIDES:${PN} = "${PN}"
 RRECOMMENDS:${PN} = ""
-RDEPENDS:${PN} = " glibc sed"
+RDEPENDS:${PN} = " glibc sed bash"
+RDEPENDS:${PN}-ptest = "${PN}"
 DEPENDS += "sed"
 
 export oe_srcdir="${exec_prefix}/src/debug/glibc/${PV}/"
