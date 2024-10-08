@@ -2,6 +2,8 @@ SUMMARY = "Keyrings for verifying opkg packages and feeds"
 LICENSE = "MIT"
 LIC_FILES_CHKSUM = "file://${COREBASE}/meta/COPYING.MIT;md5=3da9cfbcb788c80a0384361b4de20420"
 
+inherit allarch
+
 # Distro-specific keys can be added to this package in two ways:
 #
 #   1) In a .bbappend, add .gpg and/or .asc files to SRC_URI and install them to
