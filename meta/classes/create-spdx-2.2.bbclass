@@ -605,6 +605,16 @@ python do_create_spdx() {
     if patched_cves:
         recipe.sourceInfo = "CVEs fixed: " + patched_cves
 
+    ignored_cves = oe.cve_check.get_ignored_cves(d)
+    ignored_cves = list(ignored_cves)
+    ignored_cves = ' '.join(ignored_cves)
+    if ignored_cves:
+        if patched_cves:
+            recipe.sourceInfo += "; "
+        else:
+            recipe.sourceInfo = ""
+        recipe.sourceInfo += "CVEs ignored: " + ignored_cves
+
     cpe_ids = oe.cve_check.get_cpe_ids(d.getVar("CVE_PRODUCT"), d.getVar("CVE_VERSION"))
     if cpe_ids:
         for cpe_id in cpe_ids:

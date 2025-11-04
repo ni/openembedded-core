@@ -140,6 +140,19 @@ def get_patched_cves(d):
     return patched_cves
 
 
+def get_ignored_cves(d):
+    """
+    Get CVEs that are marked as ignored using the "CVE_STATUS" flag.
+    """
+    ignored_cves = set()
+    for cve in (d.getVarFlags("CVE_STATUS") or {}):
+        decoded_status, _, _ = decode_cve_status(d, cve)
+        if decoded_status == "Ignored":
+            bb.debug(2, "CVE %s is ignored" % cve)
+            ignored_cves.add(cve)
+    return ignored_cves
+
+
 def get_cpe_ids(cve_product, version):
     """
     Get list of CPE identifiers for the given product and version
