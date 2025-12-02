@@ -599,6 +599,8 @@ python do_create_spdx() {
     # Some CVEs may be patched during the build process without incrementing the version number,
     # so querying for CVEs based on the CPE id can lead to false positives. To account for this,
     # save the CVEs fixed by patches to source information field in the SPDX.
+    recipe.sourceInfo = ""
+
     patched_cves = oe.cve_check.get_patched_cves(d)
     patched_cves = list(patched_cves)
     patched_cves = ' '.join(patched_cves)
@@ -611,9 +613,11 @@ python do_create_spdx() {
     if ignored_cves:
         if patched_cves:
             recipe.sourceInfo += "; "
-        else:
-            recipe.sourceInfo = ""
         recipe.sourceInfo += "CVEs ignored: " + ignored_cves
+
+    # Remove sourceInfo if it's empty
+    if not recipe.sourceInfo:
+        delattr(recipe, 'sourceInfo')
 
     cpe_ids = oe.cve_check.get_cpe_ids(d.getVar("CVE_PRODUCT"), d.getVar("CVE_VERSION"))
     if cpe_ids:
