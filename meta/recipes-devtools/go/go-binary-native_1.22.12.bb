@@ -19,6 +19,12 @@ UPSTREAM_CHECK_REGEX = "go(?P<pver>\d+(\.\d+)+)\.linux"
 CVE_PRODUCT = "golang:go"
 CVE_STATUS[CVE-2024-3566] = "not-applicable-platform: Issue only applies on Windows"
 CVE_STATUS[CVE-2025-0913] = "not-applicable-platform: Issue only applies on Windows"
+CVE_STATUS[CVE-2025-4674] = "fixed-version: Binary used only for bootstrap; actual go compiler built from source includes fix"
+CVE_STATUS[CVE-2025-47907] = "fixed-version: Binary used only for bootstrap; actual go compiler built from source includes fix"
+CVE_STATUS[CVE-2025-58187] = "fixed-version: Binary used only for bootstrap; actual go compiler built from source includes fix"
+CVE_STATUS[CVE-2025-58188] = "fixed-version: Binary used only for bootstrap; actual go compiler built from source includes fix"
+CVE_STATUS[CVE-2025-61723] = "fixed-version: Binary used only for bootstrap; actual go compiler built from source includes fix"
+CVE_STATUS[CVE-2025-61729] = "fixed-version: Binary used only for bootstrap; actual go compiler built from source includes fix"
 
 S = "${WORKDIR}/go"
 
