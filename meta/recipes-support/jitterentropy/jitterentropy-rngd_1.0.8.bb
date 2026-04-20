@@ -22,8 +22,6 @@ SRC_URI = "git://github.com/smuellerDD/jitterentropy-rngd.git;protocol=https;bra
 PV = "1.0+git${SRCPV}"
 SRCREV = "23be1542a232aefb33a1efa8bc5eef017f2ae261"
 
-S = "${WORKDIR}/git"
-
 inherit update-rc.d systemd
 
 do_install () {
@@ -32,7 +30,7 @@ do_install () {
 			UNITDIR="${systemd_unitdir}"
 
 	install -d ${D}${sysconfdir}/init.d
-	install -m 0755 ${WORKDIR}/init-jitterentropy-rngd ${D}${sysconfdir}/init.d/jitterentropy-rngd
+	install -m 0755 ${UNPACKDIR}/init-jitterentropy-rngd ${D}${sysconfdir}/init.d/jitterentropy-rngd
 }
 
 INSANE_SKIP:${PN} += "already-stripped"
