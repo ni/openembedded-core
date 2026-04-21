@@ -64,6 +64,9 @@ fitimage_emit_fit_header() {
 / {
         description = "${FIT_DESC}";
         #address-cells = <${FIT_ADDRESS_CELLS}>;
+        version = "${FIT_VERSION}";
+        DeviceCode = "${FIT_DEVICECODE}";
+        DeviceCodes = "${FIT_DEVICECODES}";
 EOF
 }
 
