@@ -487,6 +487,10 @@ class ItsNodeRootKernel(ItsNode):
                 dtb_name = dtb.name
                 if dtb.name.startswith("fdt-"):
                     dtb_name = dtb.name[len("fdt-"):]
+                # DeviceCode in uboot env for NI devices is of format 0x76D6.
+                # And since bootscript.txt can't remove '0x' from DeviceCode before
+                # calling bootm, change FDT configuration node instead to add '0x'.
+                dtb_name = dtb_name.replace("ni-", "ni-0x")
 
                 dtb_renamed = dtb_name
                 if dtb_name in dtb_confs:
