@@ -110,7 +110,7 @@ python do_compile() {
     # Prepare a u-boot script section
     fit_uboot_env = d.getVar("FIT_UBOOT_ENV")
     if fit_uboot_env:
-        root_node.fitimage_emit_section_boot_script("bootscr-"+fit_uboot_env , fit_uboot_env)
+        root_node.fitimage_emit_section_boot_script("bootscript@"+fit_uboot_env , fit_uboot_env)
 
     # Prepare a setup section (For x86)
     setup_bin_path = os.path.join(kernel_deploydir, "setup.bin")
