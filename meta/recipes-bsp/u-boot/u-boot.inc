@@ -65,9 +65,15 @@ do_compile () {
         uboot_compile
     fi
 
-    if [ -n "${UBOOT_ENV}" ] && [ "${UBOOT_ENV_SUFFIX}" = "scr" ]
+    if [ -n "${UBOOT_ENV}" ]
     then
-        ${UBOOT_MKIMAGE} -C none -A ${UBOOT_ARCH} -T script -d ${UNPACKDIR}/${UBOOT_ENV_SRC} ${B}/${UBOOT_ENV_BINARY}
+        if [ "${UBOOT_ENV_SUFFIX}" = "scr" ]
+        then
+            ${UBOOT_MKIMAGE} -C none -A ${UBOOT_ARCH} -T script -d ${UNPACKDIR}/${UBOOT_ENV_SRC} ${B}/${UBOOT_ENV_BINARY}
+        elif [ "${UBOOT_ENV_SUFFIX}" = "txt" ]
+        then
+            install -m 644 ${UNPACKDIR}/${UBOOT_ENV_BINARY} ${B}/${UBOOT_ENV_BINARY}
+        fi
     fi
 }
 
