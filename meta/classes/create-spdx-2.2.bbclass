@@ -277,7 +277,7 @@ def add_package_sources_from_debug(d, package_doc, spdx_package, package, packag
 
 add_package_sources_from_debug[vardepsexclude] += "STAGING_KERNEL_DIR"
 
-def collect_dep_recipes(d, doc, spdx_recipe):
+def collect_dep_recipes(d, doc, spdx_recipe, direct_deps):
     import json
     from pathlib import Path
     import oe.sbom
@@ -290,9 +290,7 @@ def collect_dep_recipes(d, doc, spdx_recipe):
 
     dep_recipes = []
 
-    deps = oe.spdx_common.get_spdx_deps(d)
-
-    for dep in deps:
+    for dep in direct_deps:
         # If this dependency is not calculated in the taskhash skip it.
         # Otherwise, it can result in broken links since this task won't
         # rebuild and see the new SPDX ID if the dependency changes
@@ -398,6 +396,15 @@ def get_license_list_version(license_data, d):
     # Newer versions of the SPDX license list are SemVer ("MAJOR.MINOR.MICRO"),
     # but SPDX 2 only uses "MAJOR.MINOR".
     return ".".join(license_data["licenseListVersion"].split(".")[:2])
+
+
+# This task is added for compatibility with tasks shared with SPDX 3, but
+# doesn't do anything
+do_create_recipe_spdx() {
+    :
+}
+do_create_recipe_spdx[noexec] = "1"
+addtask do_create_recipe_spdx
 
 
 python do_create_spdx() {
@@ -524,7 +531,8 @@ python do_create_spdx() {
             if archive is not None:
                 recipe.packageFileName = str(recipe_archive.name)
 
-    dep_recipes = collect_dep_recipes(d, doc, recipe)
+    direct_deps = oe.spdx_common.collect_direct_deps(d, "do_create_spdx")
+    dep_recipes = collect_dep_recipes(d, doc, recipe, direct_deps)
 
     doc_sha1 = oe.sbom.write_doc(d, doc, pkg_arch, "recipes", indent=get_json_indent(d))
     dep_recipes.append(oe.sbom.DepRecipe(doc, doc_sha1, recipe))
@@ -595,7 +603,7 @@ python do_create_spdx() {
 }
 do_create_spdx[vardepsexclude] += "BB_NUMBER_THREADS"
 # NOTE: depending on do_unpack is a hack that is necessary to get it's dependencies for archive the source
-addtask do_create_spdx after do_package do_packagedata do_unpack do_collect_spdx_deps before do_populate_sdk do_build do_rm_work
+addtask do_create_spdx after do_create_recipe_spdx do_package do_packagedata do_unpack do_patch before do_populate_sdk do_build do_rm_work
 
 SSTATETASKS += "do_create_spdx"
 do_create_spdx[sstate-inputdirs] = "${SPDXDEPLOY}"
@@ -606,6 +614,7 @@ python do_create_spdx_setscene () {
 }
 addtask do_create_spdx_setscene
 
+do_create_spdx[deptask] += "do_create_spdx"
 do_create_spdx[dirs] = "${SPDXWORK}"
 do_create_spdx[cleandirs] = "${SPDXDEPLOY} ${SPDXWORK}"
 do_create_spdx[depends] += " \
@@ -629,7 +638,9 @@ python do_create_runtime_spdx() {
 
     license_data = oe.spdx_common.load_spdx_license_data(d)
 
-    providers = oe.spdx_common.collect_package_providers(d)
+    direct_deps = oe.spdx_common.collect_direct_deps(d, "do_create_spdx")
+
+    providers = oe.spdx_common.collect_package_providers(d, direct_deps)
     pkg_arch = d.getVar("SSTATE_PKGARCH")
     package_archs = d.getVar("SPDX_MULTILIB_SSTATE_ARCHS").split()
     package_archs.reverse()
@@ -751,6 +762,7 @@ addtask do_create_runtime_spdx_setscene
 
 do_create_runtime_spdx[dirs] = "${SPDXRUNTIMEDEPLOY}"
 do_create_runtime_spdx[cleandirs] = "${SPDXRUNTIMEDEPLOY}"
+do_create_runtime_spdx[deptask] = "do_create_spdx"
 do_create_runtime_spdx[rdeptask] = "do_create_spdx"
 
 do_rootfs[recrdeptask] += "do_create_spdx do_create_runtime_spdx"
@@ -820,7 +832,9 @@ def combine_spdx(d, rootfs_name, rootfs_deploydir, rootfs_spdxid, packages, spdx
 
     license_data = oe.spdx_common.load_spdx_license_data(d)
 
-    providers = oe.spdx_common.collect_package_providers(d)
+    direct_deps = oe.spdx_common.collect_direct_deps(d, "do_create_spdx")
+
+    providers = oe.spdx_common.collect_package_providers(d, direct_deps)
     package_archs = d.getVar("SPDX_MULTILIB_SSTATE_ARCHS").split()
     package_archs.reverse()
 
@@ -852,7 +866,8 @@ def combine_spdx(d, rootfs_name, rootfs_deploydir, rootfs_spdxid, packages, spdx
                 if d.getVar("BUILD_IMAGES_FROM_FEEDS") == "1":
                     bb.warn(f"Skipping SPDX combination for package {name}.")
                     continue
-                bb.fatal("Unable to find SPDX provider for '%s'" % name)
+                bb.note("Unable to find SPDX provider for '%s'" % name)
+                continue
 
             pkg_name, pkg_hashfn = providers[name]
 
