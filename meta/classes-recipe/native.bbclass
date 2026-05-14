@@ -98,7 +98,6 @@ do_populate_sysroot[sstate-outputdirs] = "${COMPONENTS_DIR}/${PACKAGE_ARCH}/${PN
 # Since we actually install these into situ there is no staging prefix
 STAGING_DIR_HOST = ""
 STAGING_DIR_TARGET = ""
-PKG_CONFIG_DIR = "${libdir}/pkgconfig"
 
 EXTRA_NATIVE_PKGCONFIG_PATH ?= ""
 PKG_CONFIG_PATH .= "${EXTRA_NATIVE_PKGCONFIG_PATH}"
@@ -122,18 +121,14 @@ INHIBIT_SYSROOT_STRIP ??= ""
 
 python native_virtclass_handler () {
     import re
-    pn = e.data.getVar("PN")
+    pn = d.getVar("PN")
     if not pn.endswith("-native"):
         return
-    bpn = e.data.getVar("BPN")
+    bpn = d.getVar("BPN")
 
-    # Set features here to prevent appends and distro features backfill
-    # from modifying native distro features
-    features = set(d.getVar("DISTRO_FEATURES_NATIVE").split())
-    filtered = set(bb.utils.filter("DISTRO_FEATURES", d.getVar("DISTRO_FEATURES_FILTER_NATIVE"), d).split())
-    d.setVar("DISTRO_FEATURES", " ".join(sorted(features | filtered)))
+    oe.utils.set_class_filter("DISTRO_FEATURES", "DISTRO_FEATURES_NATIVE", "DISTRO_FEATURES_FILTER_NATIVE", d)
 
-    classextend = e.data.getVar('BBCLASSEXTEND') or ""
+    classextend = d.getVar('BBCLASSEXTEND') or ""
     if "native" not in classextend:
         return
 
@@ -155,27 +150,16 @@ python native_virtclass_handler () {
     for pkg in re.split(r"\${@(?:{.*?}|.)+?}|\s", d.getVar("PACKAGES", False)):
         if not pkg:
             continue
-        map_dependencies("RDEPENDS", e.data, pkg)
-        map_dependencies("RRECOMMENDS", e.data, pkg)
-        map_dependencies("RSUGGESTS", e.data, pkg)
-        map_dependencies("RPROVIDES", e.data, pkg)
-        map_dependencies("RREPLACES", e.data, pkg)
+        map_dependencies("RDEPENDS", d, pkg)
+        map_dependencies("RRECOMMENDS", d, pkg)
+        map_dependencies("RSUGGESTS", d, pkg)
+        map_dependencies("RPROVIDES", d, pkg)
+        map_dependencies("RREPLACES", d, pkg)
 
     d.setVarFilter("PACKAGES", "native_filter(val, '" + pn + "', '" + bpn + "')")
     d.setVarFilter("PACKAGES_DYNAMIC", "native_filter(val, '" + pn + "', '" + bpn + "', regex=True)")
 
-    provides = e.data.getVar("PROVIDES")
-    nprovides = []
-    for prov in provides.split():
-        if prov.find(pn) != -1:
-            nprovides.append(prov)
-        elif not prov.endswith("-native"):
-            nprovides.append(prov + "-native")
-        else:
-            nprovides.append(prov)
-    e.data.setVar("PROVIDES", ' '.join(nprovides))
-
-
+    d.setVarFilter("PROVIDES", "native_filter(val, '" + pn + "', '" + bpn + "')")
 }
 
 addhandler native_virtclass_handler

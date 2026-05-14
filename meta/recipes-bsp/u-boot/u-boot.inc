@@ -67,12 +67,12 @@ do_compile () {
 
     if [ -n "${UBOOT_ENV}" ]
     then
+        # If UBOOT_ENV_SUFFIX is set to scr the script is packaged as a uImage otherwise it gets installed verbatim.
         if [ "${UBOOT_ENV_SUFFIX}" = "scr" ]
         then
             ${UBOOT_MKIMAGE} -C none -A ${UBOOT_ARCH} -T script -d ${UNPACKDIR}/${UBOOT_ENV_SRC} ${B}/${UBOOT_ENV_BINARY}
-        elif [ "${UBOOT_ENV_SUFFIX}" = "txt" ]
-        then
-            install -m 644 ${UNPACKDIR}/${UBOOT_ENV_BINARY} ${B}/${UBOOT_ENV_BINARY}
+        else
+            install -m 644 ${UNPACKDIR}/${UBOOT_ENV_SRC} ${B}/${UBOOT_ENV_BINARY}
         fi
     fi
 }
@@ -337,8 +337,8 @@ do_deploy () {
         fi
     fi
 
-     if [ -n "${SPL_BINARY}" ]
-     then
+    if [ -n "${SPL_BINARY}" ]
+    then
         if [ -n "${UBOOT_CONFIG}" ]
         then
             for config in ${UBOOT_MACHINE}; do

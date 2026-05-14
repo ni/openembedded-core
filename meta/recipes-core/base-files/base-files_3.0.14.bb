@@ -170,3 +170,5 @@ CONFFILES:${PN} = "${sysconfdir}/fstab ${@['', '${sysconfdir}/hostname ${sysconf
 CONFFILES:${PN} += "${sysconfdir}/motd ${sysconfdir}/nsswitch.conf ${sysconfdir}/profile"
 
 INSANE_SKIP:${PN} += "empty-dirs"
+
+CVE_STATUS[CVE-2018-6557] = "not-applicable-platform: Ubuntu specific motd update code"

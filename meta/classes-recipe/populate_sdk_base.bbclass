@@ -92,7 +92,7 @@ SDK_XZ_OPTIONS ?= "${XZ_DEFAULTS} ${SDK_XZ_COMPRESSION_LEVEL}"
 SDK_ZIP_OPTIONS ?= "-y"
 SDK_7ZIP_OPTIONS ?= "-mx=9 -mm=BZip2"
 SDK_7ZIP_TYPE ?= "7z"
-SDK_ZSTD_COMPRESSION_LEVEL = "-17"
+SDK_ZSTD_COMPRESSION_LEVEL ?= "-17"
 
 # To support different sdk type according to SDK_ARCHIVE_TYPE, now support zip and tar.xz
 python () {

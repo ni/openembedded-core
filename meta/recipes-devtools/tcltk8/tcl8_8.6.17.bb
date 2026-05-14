@@ -21,7 +21,6 @@ SRC_URI = "${BASE_SRC_URI} \
            file://fix_non_native_build_issue.patch \
            file://tcl-remove-hardcoded-install-path.patch \
            file://alter-includedir.patch \
-           file://interp.patch \
            file://run-ptest \
            file://0001-generic-tcl.h-use-Tcl_WideInt-for-seconds-in-Tcl_Tim.patch \
            "
@@ -39,15 +38,13 @@ VER = "${PV}"
 inherit autotools ptest binconfig
 
 AUTOTOOLS_SCRIPT_PATH = "${S}/unix"
-EXTRA_AUTORECONF = "--exclude=aclocal"
 
 EXTRA_OECONF = "--enable-threads --disable-rpath --enable-man-suffix=tcl8"
 
-# Prevent installing copy of tzdata based on tzdata installation on the build host
-# It doesn't install tzdata if one of the following files exist on the host:
-# /usr/share/zoneinfo/UTC /usr/share/zoneinfo/GMT /usr/share/lib/zoneinfo/UTC /usr/share/lib/zoneinfo/GMT /usr/lib/zoneinfo/UTC /usr/lib/zoneinfo/GMT
-# otherwise "/usr/lib/tcl8.6/tzdata" is included in tcl package
-EXTRA_OECONF += "--with-tzdata=no"
+PACKAGECONFIG ??= ""
+# Use of system tzdata is not recommended at present:
+# https://core.tcl-lang.org/tcl/tktview/51aa53616067cb63900b17ca1d71f07b094ffa1a
+PACKAGECONFIG[system-tzdata] = "--with-tzdata=no,--with-tzdata=yes,,tzdata"
 
 do_install() {
 	autotools_do_install
@@ -55,7 +52,7 @@ do_install() {
 	ln -sf ./tclsh${VER} ${D}${bindir}/tclsh8
 	ln -sf tclsh8.6 ${D}${bindir}/tclsh${VER}
 	sed -i "s;-L${B};-L${STAGING_LIBDIR};g" tclConfig.sh
-	sed -i "s;'${WORKDIR};'${STAGING_INCDIR};g" tclConfig.sh
+	sed -i "s;'${UNPACKDIR};'${STAGING_INCDIR};g" tclConfig.sh
 	install -d ${D}${bindir_crossscripts}
 	install -m 0755 tclConfig.sh ${D}${bindir_crossscripts}
 	install -m 0755 tclConfig.sh ${D}${libdir}
@@ -74,7 +71,7 @@ FILES:${PN}-dev += "${libdir}/tcl8Config.sh ${libdir}/tcl8ooConfig.sh"
 
 # isn't getting picked up by shlibs code
 RDEPENDS:${PN} += "tcl8-lib"
-RDEPENDS:${PN}-ptest += "libgcc locale-base-en-us tzdata"
+RDEPENDS:${PN}-ptest += "libgcc locale-base-en-us"
 
 BBCLASSEXTEND = "native nativesdk"
 
@@ -84,14 +81,12 @@ do_compile_ptest() {
 
 do_install_ptest() {
 	cp ${B}/tcltest ${D}${PTEST_PATH}
-	cp -r ${S}/library ${D}${PTEST_PATH}
 	cp -r ${S}/tests ${D}${PTEST_PATH}
-	sed -i s:@libdir@:${libdir}:g ${D}${PTEST_PATH}/run-ptest
 }
 
 do_install_ptest:append:libc-musl () {
 	# Assumes locales other than provided by musl-locales
-	sed -i '/SKIP="$SKIP socket.*$/a # unixInit-3* is suppressed due to hardcoded locale assumptions\nSKIP="$SKIP unixInit-3\\\*"' ${D}${PTEST_PATH}/run-ptest
+	sed -i '/SKIP="$SKIP.*$/a # unixInit-3* is suppressed due to hardcoded locale assumptions\nSKIP="$SKIP unixInit-3\\\*"' ${D}${PTEST_PATH}/run-ptest
 }
 
 # Fix some paths that might be used by Tcl extensions
@@ -111,6 +106,7 @@ tcl_package_preprocess() {
 	       -e "s;-L${STAGING_LIBDIR};-L${libdir};g" \
 	       -e "s;${STAGING_INCDIR};${includedir};g" \
 	       -e "s;--sysroot=${RECIPE_SYSROOT};;g" \
+	       -e "s;${B};${libdir};g" ${PKGD}${libdir}/tclConfig.sh \
 	       ${PKGD}${libdir}/tclConfig.sh
 
 	rm -f ${PKGD}${bindir_crossscripts}/tclConfig.sh

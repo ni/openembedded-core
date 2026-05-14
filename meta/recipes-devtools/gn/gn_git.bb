@@ -7,7 +7,7 @@ DEPENDS += "ninja-native"
 UPSTREAM_CHECK_COMMITS = "1"
 
 SRC_URI = "git://gn.googlesource.com/gn;protocol=https;branch=main"
-SRCREV = "103f8b437f5e791e0aef9d5c372521a5d675fabb"
+SRCREV = "eab8a9f92dca9b8548a89d9e5eb6aeb8ac6bba77"
 PV = "0+git"
 
 BB_GIT_SHALLOW = ""
@@ -30,7 +30,8 @@ do_configure() {
         --platform=${@gn_platform("TARGET_OS", d)} \
         --out-path=${B} \
         --no-static-libstdc++ \
-        --no-strip
+        --no-strip \
+        --allow-warnings
 }
 
 # Catch build progress from ninja

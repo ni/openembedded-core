@@ -74,6 +74,12 @@ USE_NLS = "yes"
 # Helps tests for -msse fail on non-SSE architectures which is all non-x86
 TUNE_CCARGS:append:toolchain-clang = " -Werror=unused-command-line-argument"
 
+# Fixes
+# aarch64-yoe-linux-ld.lld: error: version script assignment of 'PULSE_0' to symbol 'pa_glib_mainloop_free' failed: symbol not defined
+# aarch64-yoe-linux-ld.lld: error: version script assignment of 'PULSE_0' to symbol 'pa_glib_mainloop_get_api' failed: symbol not defined
+# aarch64-yoe-linux-ld.lld: error: version script assignment of 'PULSE_0' to symbol 'pa_glib_mainloop_new' failed: symbol not defined
+LDFLAGS += "${@bb.utils.contains('DISTRO_FEATURES', 'ld-is-lld', ' -Wl,--undefined-version', '', d)}"
+
 # mix_neon.c:179:9: error: invalid operand in inline asm: 'vld1.s32 ${0:h}, [$2]
 #      vld1.s32 ${1:h}, [$3] '
 TOOLCHAIN:armv7ve = "gcc"
@@ -166,6 +172,7 @@ PACKAGES =+ "\
              libpulse-simple \
              libpulsecommon \
              libpulsecore \
+             ${PN}-pactl \
              ${PN}-pa-info \
              ${PN}-server \
              ${PN}-misc \
@@ -194,8 +201,9 @@ FILES:libpulse-mainloop-glib = "${libdir}/libpulse-mainloop-glib.so.*"
 
 FILES:${PN}-dev += "${datadir}/vala"
 FILES:${PN}-bin += "${sysconfdir}/default/volatiles/04_pulse"
+FILES:${PN}-pactl = "${bindir}/pactl"
 FILES:${PN}-pa-info = "${bindir}/pa-info"
-FILES:${PN}-server = "${bindir}/pulseaudio ${bindir}/start-* ${sysconfdir} ${bindir}/pactl */udev/rules.d/*.rules */*/udev/rules.d/*.rules ${systemd_user_unitdir}/*"
+FILES:${PN}-server = "${bindir}/pulseaudio ${bindir}/start-* ${sysconfdir} */udev/rules.d/*.rules */*/udev/rules.d/*.rules ${systemd_user_unitdir}/*"
 FILES:${PN}-server += "${datadir}/dbus-1/system.d/pulseaudio-system.conf"
 
 #SYSTEMD_PACKAGES = "${PN}-server"
@@ -209,7 +217,7 @@ ALLOW_EMPTY:${PN} = "1"
 
 CONFFILES:libpulse = "${sysconfdir}/pulse/client.conf"
 
-CONFFILES:pulseaudio-server = "\ 
+CONFFILES:pulseaudio-server = "\
   ${sysconfdir}/pulse/default.pa \
   ${sysconfdir}/pulse/daemon.conf \
   ${sysconfdir}/pulse/system.pa \

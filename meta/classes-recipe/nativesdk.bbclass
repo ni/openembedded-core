@@ -17,8 +17,6 @@ CLASSOVERRIDE = "class-nativesdk"
 MACHINEOVERRIDES = ""
 
 MACHINE_FEATURES = "${SDK_MACHINE_FEATURES}"
-DISTRO_FEATURES_BACKFILL = ""
-MACHINE_FEATURES_BACKFILL = ""
 
 MULTILIBS = ""
 
@@ -74,19 +72,12 @@ exec_prefix = "${SDKPATHNATIVE}${prefix_nativesdk}"
 baselib = "lib"
 sbindir = "${bindir}"
 
-export PKG_CONFIG_DIR = "${STAGING_DIR_HOST}${libdir}/pkgconfig"
-export PKG_CONFIG_SYSROOT_DIR = "${STAGING_DIR_HOST}"
-
 python nativesdk_virtclass_handler () {
     pn = e.data.getVar("PN")
     if not (pn.endswith("-nativesdk") or pn.startswith("nativesdk-")):
         return
 
-    # Set features here to prevent appends and distro features backfill
-    # from modifying nativesdk distro features
-    features = set(d.getVar("DISTRO_FEATURES_NATIVESDK").split())
-    filtered = set(bb.utils.filter("DISTRO_FEATURES", d.getVar("DISTRO_FEATURES_FILTER_NATIVESDK"), d).split())
-    d.setVar("DISTRO_FEATURES", " ".join(sorted(features | filtered)))
+    oe.utils.set_class_filter("DISTRO_FEATURES", "DISTRO_FEATURES_NATIVESDK", "DISTRO_FEATURES_FILTER_NATIVESDK", d)
 
     e.data.setVar("MLPREFIX", "nativesdk-")
     e.data.setVar("PN", "nativesdk-" + e.data.getVar("PN").replace("-nativesdk", "").replace("nativesdk-", ""))

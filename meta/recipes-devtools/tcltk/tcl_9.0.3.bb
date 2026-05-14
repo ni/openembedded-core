@@ -21,7 +21,6 @@ SRC_URI = "${SOURCEFORGE_MIRROR}/tcl/tcl-core${PV}-src.tar.gz \
            file://0002-tcl-fix-a-build-issue.patch \
            file://0003-tcl-install-tcl-to-lib64-instead-of-lib-on-64bit-tar.patch \
            file://0004-tcl-update-the-header-location.patch \
-           file://0005-tcl-fix-race-in-interp.test.patch \
            "
 SRC_URI[sha256sum] = "407a073ee8f718200c3a004bc2186deccc33356ee5112a71d8b01b55230f4ee4"
 
@@ -35,15 +34,13 @@ VER = "${PV}"
 inherit autotools ptest binconfig
 
 AUTOTOOLS_SCRIPT_PATH = "${S}/unix"
-EXTRA_AUTORECONF = "--exclude=aclocal"
 
 EXTRA_OECONF = "--disable-rpath --enable-man-suffix=tcl9 --disable-zipfs"
 
-# Prevent installing copy of tzdata based on tzdata installation on the build host
-# It doesn't install tzdata if one of the following files exist on the host:
-# /usr/share/zoneinfo/UTC /usr/share/zoneinfo/GMT /usr/share/lib/zoneinfo/UTC /usr/share/lib/zoneinfo/GMT /usr/lib/zoneinfo/UTC /usr/lib/zoneinfo/GMT
-# otherwise "/usr/lib/tcl8.6/tzdata" is included in tcl package
-EXTRA_OECONF += "--with-tzdata=no"
+PACKAGECONFIG ??= ""
+# Use of system tzdata is not recommended at present:
+# https://core.tcl-lang.org/tcl/tktview/51aa53616067cb63900b17ca1d71f07b094ffa1a
+PACKAGECONFIG[system-tzdata] = "--with-tzdata=no,--with-tzdata=yes,,tzdata"
 
 do_install() {
 	autotools_do_install
@@ -70,7 +67,7 @@ FILES:${PN}-dev += "${libdir}/tclConfig.sh ${libdir}/tclooConfig.sh"
 
 # isn't getting picked up by shlibs code
 RDEPENDS:${PN} += "tcl-lib"
-RDEPENDS:${PN}-ptest += "libgcc locale-base-en-us tzdata"
+RDEPENDS:${PN}-ptest += "libgcc locale-base-en-us"
 
 BBCLASSEXTEND = "native nativesdk"
 
@@ -80,15 +77,12 @@ do_compile_ptest() {
 
 do_install_ptest() {
 	cp ${B}/tcltest ${D}${PTEST_PATH}
-	cp -r ${S}/library ${D}${PTEST_PATH}
 	cp -r ${S}/tests ${D}${PTEST_PATH}
-        # handle multilib
-        sed -i s:@libdir@:${libdir}:g ${D}${PTEST_PATH}/run-ptest
 }
 
 do_install_ptest:append:libc-musl () {
 	# Assumes locales other than provided by musl-locales
-	sed -i '/SKIP="$SKIP socket.*$/a # unixInit-3* is suppressed due to hardcoded locale assumptions\nSKIP="$SKIP unixInit-3\\\*"' ${D}${PTEST_PATH}/run-ptest
+	sed -i '/SKIP="$SKIP.*$/a # unixInit-3* is suppressed due to hardcoded locale assumptions\nSKIP="$SKIP unixInit-3\\\*"' ${D}${PTEST_PATH}/run-ptest
 }
 
 # Fix some paths that might be used by Tcl extensions

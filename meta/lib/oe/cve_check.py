@@ -205,6 +205,34 @@ def get_patched_cves(d):
     return patched_cves
 
 
+_CPE23_ENCODE_TRANS_TABLE = str.maketrans(
+    {c: f"\\{c}" for c in [
+        "\\", "!", '"', "#", "$", "%", "&", "'", "(", ")", "+", ",", "/", ":", ";",
+        "<", "=", ">", "@", "[", "]", "^", "`", "{", "|", "}", "~", "?", "*"
+    ]}
+)
+
+
+def cpe_escape(value):
+    """
+    Escape special characters for CPE 2.3 formatted string binding.
+
+    CPE 2.3 formatted string binding (cpe:2.3:...) uses backslash escaping
+    for special meta-characters, NOT percent-encoding. Percent-encoding is
+    only used in the URI binding (cpe:/...).
+
+    According to NISTIR 7695, various characters referenced in the "Figure 6-3.
+    ABNF for Formatted String Binding" need escaping: escape, special and punc.
+    """
+    if not value:
+        return value
+
+    # Do not break compatibility
+    value = value.replace("\\+", "+")
+
+    return value.translate(_CPE23_ENCODE_TRANS_TABLE)
+
+
 def get_cpe_ids(cve_product, version):
     """
     Get list of CPE identifiers for the given product and version
@@ -221,7 +249,14 @@ def get_cpe_ids(cve_product, version):
         else:
             vendor = "*"
 
-        cpe_id = 'cpe:2.3:*:{}:{}:{}:*:*:*:*:*:*:*'.format(vendor, product, version)
+        # Encode special characters per CPE 2.3 specification
+        encoded_vendor = cpe_escape(vendor) if vendor != "*" else vendor
+        encoded_product = cpe_escape(product)
+        encoded_version = cpe_escape(version)
+
+        cpe_id = 'cpe:2.3:*:{}:{}:{}:*:*:*:*:*:*:*'.format(
+            encoded_vendor, encoded_product, encoded_version
+        )
         cpe_ids.append(cpe_id)
 
     return cpe_ids

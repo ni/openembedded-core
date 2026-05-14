@@ -26,7 +26,7 @@ SYSROOT=""
 if test "x$D" != "x"; then
 	# Installing into a sysroot
 	SYSROOT="$D"
-	OPT="--root $D"
+	OPT="--prefix $D"
 
 	# Make sure login.defs is there, this is to make debian package backend work
 	# correctly while doing rootfs.
@@ -37,7 +37,7 @@ if test "x$D" != "x"; then
 	    cp $D${sysconfdir}/login.defs.dpkg-new $D${sysconfdir}/login.defs
 	fi
 
-	# user/group lookups should match useradd/groupadd --root
+	# user/group lookups should match useradd/groupadd --prefix
 	export PSEUDO_PASSWD="$SYSROOT"
 fi
 
@@ -212,6 +212,11 @@ def update_useradd_after_parse(d):
     useradd_packages = d.getVar('USERADD_PACKAGES')
 
     if not useradd_packages:
+        # It's valid to inherit useradd and only set USERADD_DEPENDS to
+        # depend on users/groups created by another recipe, without
+        # creating any users/groups in this recipe.
+        if d.getVar('USERADD_DEPENDS'):
+            return
         bb.fatal("%s inherits useradd but doesn't set USERADD_PACKAGES" % d.getVar('FILE', False))
 
     for pkg in useradd_packages.split():

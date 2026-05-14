@@ -106,7 +106,7 @@ def get_kernel_cves(datadir, compiled_files, version):
                     "status": "Ignored",
                     "detail": "not-applicable-config",
                     "summary": description,
-                    "description": f"Source code not compiled by config. {affected_files}"
+                    "description": f"Source code not compiled by config. {sorted(affected_files)}"
                 }
                 not_applicable_config +=1
             # Check if we have backport
@@ -164,7 +164,7 @@ def get_kernel_cves(datadir, compiled_files, version):
                     "status": "Patched",
                     "detail": "fixed-version",
                     "summary": description,
-                    "description": f"fixed-version: Fixed from version {last_affected}"
+                    "description": f"Fixed from version {last_affected}"
                 }
                 not_vulnerable += 1
             elif backport_base == base_version:
@@ -358,11 +358,12 @@ def cve_update(cve_data, cve, entry):
         cve_data[cve] = copy_data(cve_data[cve], entry)
         return
     if cve_data[cve]['status'] == entry['status']:
+        cve_data[cve] = copy_data(cve_data[cve], entry)
         return
     if entry['status'] == "Unpatched" and cve_data[cve]['status'] == "Patched":
         # Backported-patch (e.g. vendor kernel repo with cherry-picked CVE patch)
         # has priority over unpatch from CNA
-        if cve_data[cve]['detail'] == "backported-patch":
+        if "detail" in cve_data and cve_data[cve]['detail'] == "backported-patch":
             return
         logging.warning("CVE entry %s update from Patched to Unpatched from the scan result", cve)
         cve_data[cve] = copy_data(cve_data[cve], entry)

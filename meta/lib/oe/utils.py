@@ -83,6 +83,41 @@ def set_intersect(variable1, variable2, d):
     val2 = set(d.getVar(variable2).split())
     return " ".join(val1 & val2)
 
+def set_difference(variable1, variable2, d):
+    """
+    Expand both variables, interpret them as lists of strings, and return the
+    difference as a flattened string.
+
+    For example:
+    s1 = "a b c"
+    s2 = "b c d"
+    s3 = set_difference(s1, s2)
+    => s3 = "a"
+
+    If '*' is present as a separate token (not part of a larger identifier) in
+    the second operand, this is interpreted as "remove all entries":
+    s1 = "a b c"
+    s2 = "*"
+    s3 = set_difference(s1, s2)
+    => s3 = ""
+    """
+    val1 = d.getVar(variable1)
+    if not val1:
+        return ""
+    val2 = d.getVar(variable2)
+    if not val2:
+        return val1
+
+    val1 = set(val1.split())
+    val2 = set(val2.split())
+
+    if "*" in val2:
+        return ""
+
+    # Return a sorted string to ensure that the result is consistent between
+    # parser runs.
+    return " ".join(sorted(val1 - val2))
+
 def prune_suffix(var, suffixes, d):
     # See if var ends with any of the suffixes listed and
     # remove it if found
@@ -112,26 +147,28 @@ def inherits(d, *classes):
     """Return True if the metadata inherits any of the specified classes"""
     return any(bb.data.inherits_class(cls, d) for cls in classes)
 
-def features_backfill(var,d):
-    # This construct allows the addition of new features to variable specified
-    # as var
-    # Example for var = "DISTRO_FEATURES"
-    # This construct allows the addition of new features to DISTRO_FEATURES
-    # that if not present would disable existing functionality, without
-    # disturbing distributions that have already set DISTRO_FEATURES.
-    # Distributions wanting to elide a value in DISTRO_FEATURES_BACKFILL should
-    # add the feature to DISTRO_FEATURES_BACKFILL_CONSIDERED
-    features = (d.getVar(var) or "").split()
-    backfill = (d.getVar(var+"_BACKFILL") or "").split()
-    considered = (d.getVar(var+"_BACKFILL_CONSIDERED") or "").split()
+def filter_default_features(varname, d):
+    # Process default features to exclude features which the user has opted out
+    # of. The result is appended to the target variable (e.g. DISTRO_FEATURES
+    # or MACHINE_FEATURES).
+    default_features = set_difference(varname + "_DEFAULTS",
+                                      varname + "_OPTED_OUT",
+                                      d)
+    return default_features
 
-    addfeatures = []
-    for feature in backfill:
-        if feature not in features and feature not in considered:
-            addfeatures.append(feature)
+def class_filter_features(defaults, features_var, filter_var, d):
+    features = set(d.getVar(features_var).split())
+    filtered = set(bb.utils.filter_string(defaults, d.getVar(filter_var)).split())
+    return " ".join(sorted(features | filtered))
 
-    if addfeatures:
-        d.appendVar(var, " " + " ".join(addfeatures))
+def set_class_filter(var, features_var, filter_var, d):
+    defaults = d.getVar(var)
+    if "}" in defaults:
+        issues = [c for c in defaults.split() if "}" in c]
+        for issue in issues:
+            defaults = defaults.replace(issue, "")
+            bb.warn("Unexpanded variable %s in %s is not recommended" % (issue, var))
+    d.setVar(var, '${@oe.utils.class_filter_features("' + defaults + '", "' + features_var + '", "' + filter_var + '", d)}')
 
 def all_distro_features(d, features, truevalue="1", falsevalue=""):
     """
@@ -511,3 +548,50 @@ def touch(filename):
         # Handle read-only file systems gracefully
         if e.errno != errno.EROFS:
             raise e
+
+#
+# Set datastore variables to convert to an architecture independent state
+# Used by allarch recipes and other cases where arch independence is needed
+#
+def make_arch_independent(d):
+    # No need for virtual/libc or a cross compiler
+    d.setVar("INHIBIT_DEFAULT_DEPS","1")
+
+    # Set these to a common set of values, we shouldn't be using them other that for WORKDIR directory
+    # naming anyway
+    d.setVar("baselib", "lib")
+    d.setVar("TARGET_ARCH", "allarch")
+    d.setVar("TARGET_OS", "linux")
+    d.setVar("TARGET_CC_ARCH", "none")
+    d.setVar("TARGET_LD_ARCH", "none")
+    d.setVar("TARGET_AS_ARCH", "none")
+    d.setVar("TARGET_FPU", "")
+    d.setVar("TARGET_PREFIX", "")
+    # Expand PACKAGE_EXTRA_ARCHS since the staging code needs this
+    # (this removes any dependencies from the hash perspective)
+    d.setVar("PACKAGE_EXTRA_ARCHS", d.getVar("PACKAGE_EXTRA_ARCHS"))
+    d.setVar("SDK_ARCH", "none")
+    d.setVar("SDK_CC_ARCH", "none")
+    d.setVar("TARGET_CPPFLAGS", "none")
+    d.setVar("TARGET_CFLAGS", "none")
+    d.setVar("TARGET_CXXFLAGS", "none")
+    d.setVar("TARGET_LDFLAGS", "none")
+    d.setVar("POPULATESYSROOTDEPS", "")
+
+    # Avoid this being unnecessarily different due to nuances of
+    # the target machine that aren't important for "all" arch
+    # packages.
+    d.setVar("LDFLAGS", "")
+
+    # No need to do shared library processing or debug symbol handling
+    d.setVar("EXCLUDE_FROM_SHLIBS", "1")
+    d.setVar("INHIBIT_PACKAGE_DEBUG_SPLIT", "1")
+    d.setVar("INHIBIT_PACKAGE_STRIP", "1")
+
+    # These multilib values shouldn't change allarch packages so exclude them
+    d.appendVarFlag("emit_pkgdata", "vardepsexclude", " MULTILIB_VARIANTS")
+    d.appendVarFlag("write_specfile", "vardepsexclude", " MULTILIBS")
+    d.appendVarFlag("do_package", "vardepsexclude", " package_do_shlibs")
+
+    d.setVar("qemu_wrapper_cmdline", "def qemu_wrapper_cmdline(data, rootfs_path, library_paths):\n    return 'false'")
+

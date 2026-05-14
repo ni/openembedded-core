@@ -10,6 +10,7 @@ DEPENDS:append:class-native = " file-replacement-native"
 
 SRC_URI = "${APACHE_MIRROR}/${BPN}/${BPN}-${PV}.tar.bz2 \
            file://serfmacro.patch \
+           file://parallel.patch \
            "
 
 SRC_URI[sha256sum] = "e78a29e7766b8b7b354497d08f71a55641abc53675ce1875584781aae35644a1"
@@ -40,8 +41,6 @@ EXTRA_OEMAKE += "pkgconfig_dir=${libdir}/pkgconfig"
 
 CPPFLAGS += "-P"
 BUILD_CPPFLAGS += "-P"
-
-EXTRA_AUTORECONF += "--exclude=aclocal"
 
 do_configure:prepend () {
     # autogen.sh manually puts things in the right place, and libtoolize doesn't

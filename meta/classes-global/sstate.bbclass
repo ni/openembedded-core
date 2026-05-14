@@ -9,7 +9,7 @@ SSTATE_VERSION = "14"
 SSTATE_ZSTD_CLEVEL ??= "8"
 
 SSTATE_MANIFESTS ?= "${TMPDIR}/sstate-control"
-SSTATE_MANFILEPREFIX = "${SSTATE_MANIFESTS}/manifest-${SSTATE_MANMACH}-${PN}"
+SSTATE_MANFILEPREFIX = "${SSTATE_MANIFESTS}/manifest-${SSTATE_PKGARCH}-${PN}"
 
 def generate_sstatefn(spec, hash, taskname, siginfo, d):
     if taskname is None:
@@ -57,9 +57,6 @@ SSTATE_EXTRAPATHWILDCARD[vardepvalue] = ""
 
 # Avoid docbook/sgml catalog warnings for now
 SSTATE_ALLOW_OVERLAP_FILES += "${STAGING_ETCDIR_NATIVE}/sgml ${STAGING_DATADIR_NATIVE}/sgml"
-# sdk-provides-dummy-nativesdk and nativesdk-buildtools-perl-dummy overlap for different SDKMACHINE
-SSTATE_ALLOW_OVERLAP_FILES += "${DEPLOY_DIR_RPM}/sdk_provides_dummy_nativesdk/ ${DEPLOY_DIR_IPK}/sdk-provides-dummy-nativesdk/"
-SSTATE_ALLOW_OVERLAP_FILES += "${DEPLOY_DIR_RPM}/buildtools_dummy_nativesdk/ ${DEPLOY_DIR_IPK}/buildtools-dummy-nativesdk/"
 # target-sdk-provides-dummy overlaps that allarch is disabled when multilib is used
 SSTATE_ALLOW_OVERLAP_FILES += "${COMPONENTS_DIR}/sdk-provides-dummy-target/ ${DEPLOY_DIR_RPM}/sdk_provides_dummy_target/ ${DEPLOY_DIR_IPK}/sdk-provides-dummy-target/"
 # Archive the sources for many architectures in one deploy folder
@@ -88,15 +85,14 @@ SSTATE_ARCHS = " \
     ${BUILD_ARCH} \
     ${BUILD_ARCH}_${ORIGNATIVELSBSTRING} \
     ${BUILD_ARCH}_${SDK_ARCH}_${SDK_OS} \
-    ${SDK_ARCH}_${SDK_OS} \
-    ${SDK_ARCH}_${SDK_ARCH}-${SDKPKGSUFFIX} \
+    ${SDK_ARCH}-${SDKPKGSUFFIX} \
+    ${DUMMY_PACKAGE_ARCHS_SDK} \
+    ${DUMMY_PACKAGE_ARCHS_TARGET} \
     allarch \
     ${SSTATE_ARCHS_TUNEPKG} \
     ${PACKAGE_EXTRA_ARCHS} \
     ${MACHINE_ARCH}"
-SSTATE_ARCHS[vardepsexclude] = "ORIGNATIVELSBSTRING"
-
-SSTATE_MANMACH ?= "${SSTATE_PKGARCH}"
+SSTATE_ARCHS[vardepsexclude] = "ORIGNATIVELSBSTRING DUMMY_PACKAGE_ARCHS_SDK DUMMY_PACKAGE_ARCHS_TARGET"
 
 SSTATECREATEFUNCS += "sstate_hardcode_path"
 SSTATECREATEFUNCS[vardeps] = "SSTATE_SCAN_FILES"
@@ -142,14 +138,9 @@ python () {
         d.setVar('SSTATE_PKGARCH', d.expand("${BUILD_ARCH}_${SDK_ARCH}_${SDK_OS}"))
     elif bb.data.inherits_class('cross', d):
         d.setVar('SSTATE_PKGARCH', d.expand("${BUILD_ARCH}"))
-    elif bb.data.inherits_class('nativesdk', d):
-        d.setVar('SSTATE_PKGARCH', d.expand("${SDK_ARCH}_${SDK_OS}"))
-    elif bb.data.inherits_class('cross-canadian', d):
-        d.setVar('SSTATE_PKGARCH', d.expand("${SDK_ARCH}_${PACKAGE_ARCH}"))
     elif bb.data.inherits_class('allarch', d) and d.getVar("PACKAGE_ARCH") == "all":
         d.setVar('SSTATE_PKGARCH', "allarch")
-    else:
-        d.setVar('SSTATE_MANMACH', d.expand("${PACKAGE_ARCH}"))
+    # Fall back to the default of SSTATE_PKGARCH=PACKAGE_ARCH
 
     if bb.data.inherits_class('native', d) or bb.data.inherits_class('crosssdk', d) or bb.data.inherits_class('cross', d):
         d.setVar('SSTATE_EXTRAPATH', "${NATIVELSBSTRING}/")
@@ -320,7 +311,7 @@ def sstate_install(ss, d):
 
     # Append to the list of manifests for this PACKAGE_ARCH
 
-    i = d2.expand("${SSTATE_MANIFESTS}/index-${SSTATE_MANMACH}")
+    i = d2.expand("${SSTATE_MANIFESTS}/index-${SSTATE_PKGARCH}")
     l = bb.utils.lockfile(i + ".lock")
     filedata = d.getVar("STAMP") + " " + d2.getVar("SSTATE_MANFILEPREFIX") + " " + d.getVar("WORKDIR") + "\n"
     manifests = []
@@ -342,9 +333,9 @@ def sstate_install(ss, d):
     for plain in ss['plaindirs']:
         workdir = d.getVar('WORKDIR')
         sharedworkdir = os.path.join(d.getVar('TMPDIR'), "work-shared")
-        src = sstateinst + "/" + plain.replace(workdir, '')
+        src = plain.replace(workdir, sstateinst)
         if sharedworkdir in plain:
-            src = sstateinst + "/" + plain.replace(sharedworkdir, '')
+            src = plain.replace(sharedworkdir, sstateinst)
         dest = plain
         bb.utils.mkdirhier(src)
         prepdir(dest)
@@ -353,7 +344,7 @@ def sstate_install(ss, d):
     for lock in locks:
         bb.utils.unlockfile(lock)
 
-sstate_install[vardepsexclude] += "SSTATE_ALLOW_OVERLAP_FILES SSTATE_MANMACH SSTATE_MANFILEPREFIX STAMP"
+sstate_install[vardepsexclude] += "SSTATE_ALLOW_OVERLAP_FILES SSTATE_PKGARCH SSTATE_MANFILEPREFIX STAMP"
 
 def sstate_installpkg(ss, d):
     from oe.gpg_sign import get_signer
@@ -487,7 +478,7 @@ def sstate_clean_manifest(manifest, d, canrace=False, prefix=None):
         entry = entry.strip()
         if prefix and not entry.startswith("/"):
             entry = prefix + "/" + entry
-        bb.debug(2, "Removing manifest: %s" % entry)
+        bb.debug(2, "Removing file: %s" % entry)
         # We can race against another package populating directories as we're removing them
         # so we ignore errors here.
         try:
@@ -520,7 +511,7 @@ def sstate_clean(ss, d):
     stamp_clean = d.getVar("STAMPCLEAN")
     extrainf = d.getVarFlag("do_" + ss['task'], 'stamp-extra-info')
     if extrainf:
-        d2.setVar("SSTATE_MANMACH", extrainf)
+        d2.setVar("SSTATE_PKGARCH", extrainf)
         wildcard_stfile = "%s.do_%s*.%s" % (stamp_clean, ss['task'], extrainf)
     else:
         wildcard_stfile = "%s.do_%s*" % (stamp_clean, ss['task'])
@@ -648,7 +639,6 @@ def sstate_package(ss, d):
     for state in ss['dirs']:
         if not os.path.exists(state[1]):
             continue
-        srcbase = state[0].rstrip("/").rsplit('/', 1)[0]
         # Find and error for absolute symlinks. We could attempt to relocate but its not
         # clear where the symlink is relative to in this context. We could add that markup
         # to sstate tasks but there aren't many of these so better just avoid them entirely.
@@ -664,10 +654,15 @@ def sstate_package(ss, d):
                     continue
                 bb.error("sstate found an absolute path symlink %s pointing at %s. Please replace this with a relative link." % (srcpath, link))
                 exit = True
+            for dir in dirs:
+                dir = os.path.join(walkroot, dir).removeprefix(state[1])
+                if tmpdir in dir:
+                    bb.error("sstate found a tmpdir path reference in installation directiory %s which must be removed." % dir)
+                    exit = True
         bb.debug(2, "Preparing tree %s for packaging at %s" % (state[1], sstatebuild + state[0]))
         bb.utils.rename(state[1], sstatebuild + state[0])
     if exit:
-        bb.fatal("Failing task due to absolute path symlinks")
+        bb.fatal("Failing task due to absolute path symlinks or tmpdir path reference")
 
     workdir = d.getVar('WORKDIR')
     sharedworkdir = os.path.join(d.getVar('TMPDIR'), "work-shared")
@@ -796,6 +791,7 @@ sstate_task_postfunc[dirs] = "${WORKDIR}"
 # and renamed in place once created.
 python sstate_create_and_sign_package () {
     from pathlib import Path
+    import errno
 
     # Best effort touch
     def touch(file):
@@ -815,6 +811,9 @@ python sstate_create_and_sign_package () {
             else:
                 os.link(src, dst)
             return True
+        except OSError as e:
+            if e.errno == errno.ENOSYS:
+                bb.fatal("sstate is only supported on file systems with hard link support: %s" % e)
         except:
             pass
 
@@ -954,7 +953,7 @@ def sstate_checkhashes(sq_data, d, siginfo=False, currentcount=0, summary=True, 
             extrapath = d.getVar("NATIVELSBSTRING") + "/"
         else:
             extrapath = ""
-        
+
         tname = bb.runqueue.taskname_from_tid(task)[3:]
 
         if tname in ["fetch", "unpack", "patch", "populate_lic", "preconfigure"] and splithashfn[2]:
@@ -1116,7 +1115,7 @@ def setscene_depvalid(task, taskdependees, notneeded, d, log=None):
 
     logit("Considering setscene task: %s" % (str(taskdependees[task])), log)
 
-    directtasks = ["do_populate_lic", "do_deploy_source_date_epoch", "do_shared_workdir", "do_stash_locale", "do_gcc_stash_builddir", "do_create_spdx", "do_deploy_archives"]
+    directtasks = ["do_populate_lic", "do_deploy_source_date_epoch", "do_shared_workdir", "do_stash_locale", "do_gcc_stash_builddir", "do_create_spdx", "do_create_recipe_spdx", "do_deploy_archives"]
 
     def isNativeCross(x):
         return x.endswith("-native") or "-cross-" in x or "-crosssdk" in x or x.endswith("-cross")

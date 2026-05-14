@@ -551,6 +551,21 @@ def check_tar_version(sanity_data):
     except subprocess.CalledProcessError as e:
         return "Unable to execute tar --help, exit code %d\n%s\n" % (e.returncode, e.output)
 
+    try:
+        distro = oe.lsb.distro_identifier()
+    except Exception:
+        distro = None
+
+    if distro:
+        rhel9_alike_prefixes = ("rhel-9", "centos-9", "rocky-9", "almalinux-9")
+        rhel9_tar_minimum_version = "1.35"
+        for prefix in rhel9_alike_prefixes:
+            if distro.startswith(prefix) and bb.utils.vercmp_string_op(version, rhel9_tar_minimum_version, "<"):
+                return ("Your version of tar is older than %s and crashes when extracting read-only files with xattrs. "
+                        "Your distro is %s which triggers this bug due to the presence of selinux attributes. "
+                        "Please install a newer version of tar (you could use the project's buildtools-tarball from "
+                        "our last release or use scripts/install-buildtools).\n" % (rhel9_tar_minimum_version, distro))
+
     return None
 
 # We use git parameters and functionality only found in 1.7.8 or later
@@ -824,6 +839,13 @@ def check_sanity_version_change(status, d):
         "An error occurred during checking the C++ toolchain for '--std=gnu++20' support. "
         "Please use a g++ compiler that supports C++20 (e.g. g++ version 10 onwards)."))
 
+    # Check there aren't obsolete wic/wks directories
+    for component in d.getVar("BBPATH").split(":") + d.getVar("BBLAYERS").split():
+        for subcomponent in ['wic', 'scripts/lib/wic/canned-wks']:
+            testpath = os.path.join(component, subcomponent)
+            if os.path.exists(testpath):
+                status.addresult("wic/wks files at %s need to be moved to files/wic within the layer to be found/used\n" % testpath)
+
 def sanity_check_locale(d):
     """
     Currently bitbake switches locale to en_US.UTF-8 so check that this locale actually exists.
@@ -953,6 +975,19 @@ def check_sanity_everybuild(status, d):
         if val.find('%') != -1:
             status.addresult("Error, you have an invalid character (%) in your %s directory path which causes problems with python string formatting. Please move the installation to a directory which doesn't include any % characters." % checkdir)
 
+    # Redundant slashes (trailing slash or consecutive slashes) in TMPDIR
+    # break the sstate staging machinery which relies on exact string matching
+    # of manifest paths.  Reject any TMPDIR that differs from its normalised form.
+    tmpdir = d.getVar('TMPDIR')
+    if tmpdir and tmpdir != os.path.normpath(tmpdir):
+        status.addresult("Error, TMPDIR (%s) contains redundant slashes. "
+            "Please set TMPDIR to a clean path with no trailing slash or "
+            "consecutive slashes (e.g. %s).\n" % (tmpdir, os.path.normpath(tmpdir)))
+
+    # Check whether the SOURCE_MIRROR_URL variable, belonging to the 'own-mirrors' class, is defined
+    if oe.utils.inherits(d, 'own-mirrors') and not d.getVar('SOURCE_MIRROR_URL'):
+        status.addresult("own-mirrors is enabled, but SOURCE_MIRROR_URL is not defined")
+
     # Check the format of MIRRORS, PREMIRRORS and SSTATE_MIRRORS
     import re
     mirror_vars = ['MIRRORS', 'PREMIRRORS', 'SSTATE_MIRRORS']
@@ -997,10 +1032,34 @@ def check_sanity_everybuild(status, d):
                     mirror_base = urllib.parse.urlparse(mirror[:-1*len('/PATH')]).path
                     check_symlink(mirror_base, d)
 
-    # Check sstate mirrors aren't being used with a local hash server and no remote
-    hashserv = d.getVar("BB_HASHSERVE")
-    if d.getVar("SSTATE_MIRRORS") and hashserv and hashserv.startswith("unix://") and not d.getVar("BB_HASHSERVE_UPSTREAM"):
-        bb.warn("You are using a local hash equivalence server but have configured an sstate mirror. This will likely mean no sstate will match from the mirror. You may wish to disable the hash equivalence use (BB_HASHSERVE), or use a hash equivalence server alongside the sstate mirror.")
+    if d.getVar("BB_SIGNATURE_HANDLER") == "OEEquivHash":
+        # Check sstate mirrors aren't being used with a local hash server and no remote
+        hashserv = d.getVar("BB_HASHSERVE")
+        if d.getVar("SSTATE_MIRRORS") and hashserv and hashserv.startswith("unix://") and not d.getVar("BB_HASHSERVE_UPSTREAM"):
+            bb.warn("You are using a local hash equivalence server but have configured an sstate mirror. This will likely mean no sstate will match from the mirror. You may wish to disable the hash equivalence use (BB_HASHSERVE), or use a hash equivalence server alongside the sstate mirror.")
+
+        # Check that when SSTATE_DIR is shared between builds, hashserve database is not private to a build
+        hashserv_proto,_,hashserv_path,_,_,_ = bb.fetch2.decodeurl(hashserv)
+        if hashserv_proto == "unix":
+            dbdir = d.getVar("BB_HASHSERVE_DB_DIR") or d.getVar("PERSISTENT_DIR") or d.getVar("CACHE")
+            topdir = d.getVar("TOPDIR")
+            sstatedir = d.getVar("SSTATE_DIR")
+
+            if (hashserv_path.startswith(topdir) and dbdir.startswith(topdir) and not sstatedir.startswith(topdir)):
+                if bb.utils.is_path_on_nfs(sstatedir):
+                    bb.warn("""Sstate directory is on a shared NFS (it is set via SSTATE_DIR to {}),
+        but hash equivalency database is inside this particular build directory {}.
+
+        This will prevent sstate reuse, and it is recommended to set up a permanently running hash equivalency server
+        according to https://docs.yoctoproject.org/dev-manual/hashequivserver.html""".format(sstatedir, topdir))
+                else:
+                    bb.warn("""Sstate directory is shared between several builds (it is set via SSTATE_DIR to {}),
+        but hash equivalency database is inside this particular build directory {}.
+
+        This will prevent sstate reuse, and it is recommended to set the location for the database to a common path
+        via BB_HASHSERVE_DB_DIR, for example:
+
+        BB_HASHSERVE_DB_DIR = \"${{SSTATE_DIR}}\"""".format(sstatedir, topdir))
 
     # Check that TMPDIR hasn't changed location since the last time we were run
     tmpdir = d.getVar('TMPDIR')

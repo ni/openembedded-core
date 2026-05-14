@@ -324,15 +324,27 @@ def get_signatures(builddir, failsafe=False, machine=None, extravars=None):
         else:
             raise
 
-    sig_regex = re.compile(r"^(?P<task>.*:.*):(?P<hash>.*) .$")
-    tune_regex = re.compile(r"(^|\s)SIGGEN_LOCKEDSIGS_t-(?P<tune>\S*)\s*=\s*")
+    sig_regex = re.compile(r"^(?P<task>[^:]*:[^:]*):(?P<hash>[^:]*) .$")
+    assignment_regex = re.compile(r"^\s*(?P<var>\S+)\s*\+?=")
+    lockedsigs_regex = re.compile(r"^SIGGEN_LOCKEDSIGS_t-(?P<tune>\S*)$")
     current_tune = None
     with open(sigs_file, 'r') as f:
         for line in f.readlines():
             line = line.strip()
-            t = tune_regex.search(line)
-            if t:
-                current_tune = t.group('tune')
+            assignment = assignment_regex.search(line)
+            if assignment:
+                lockedsigs = lockedsigs_regex.search(assignment.group('var'))
+                if lockedsigs:
+                    # This variable contains signatures we want to compare
+                    current_tune = lockedsigs.group('tune')
+                else:
+                    # This variable isn't relevant for us
+                    current_tune = None
+                continue
+
+            if not current_tune:
+                continue
+
             s = sig_regex.match(line)
             if s:
                 exclude = False
@@ -360,12 +372,15 @@ def get_depgraph(targets=['world'], failsafe=False):
     depgraph = None
     with bb.tinfoil.Tinfoil() as tinfoil:
         tinfoil.prepare(config_only=False)
-        tinfoil.set_event_mask(['bb.event.NoProvider', 'bb.event.DepTreeGenerated', 'bb.command.CommandCompleted'])
+        tinfoil.set_event_mask(['bb.event.NoProvider', 'bb.event.DepTreeGenerated', 'bb.command.CommandCompleted', 'bb.command.CommandFailed'])
         if not tinfoil.run_command('generateDepTreeEvent', targets, 'do_build'):
             raise RuntimeError('starting generateDepTreeEvent failed')
+        timeouts = 0
+        max_timeouts = 300
         while True:
             event = tinfoil.wait_event(timeout=1000)
             if event:
+                timeouts = 0
                 if isinstance(event, bb.command.CommandFailed):
                     raise RuntimeError('Generating dependency information failed: %s' % event.error)
                 elif isinstance(event, bb.command.CommandCompleted):
@@ -382,6 +397,10 @@ def get_depgraph(targets=['world'], failsafe=False):
                         raise RuntimeError('Nothing provides %s.' % (event._item))
                 elif isinstance(event, bb.event.DepTreeGenerated):
                     depgraph = event._depgraph
+            else:
+                timeouts += 1
+                if timeouts > max_timeouts:
+                    raise RuntimeError('Timed out waiting for dependency graph generation to complete after %d seconds' % max_timeouts)
 
     if depgraph is None:
         raise RuntimeError('Could not retrieve the depgraph.')

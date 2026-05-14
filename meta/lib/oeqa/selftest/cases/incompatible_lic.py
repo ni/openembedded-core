@@ -5,6 +5,7 @@
 #
 from oeqa.selftest.case import OESelftestTestCase
 from oeqa.utils.commands import bitbake
+from oeqa.core.decorator.data import skipIfNotFeature
 
 class IncompatibleLicenseTestObsolete(OESelftestTestCase):
 
@@ -107,7 +108,7 @@ MACHINE_ESSENTIAL_EXTRA_RDEPENDS:remove = "tar"
 
     def test_bash_default(self):
         self.write_config(self.default_config())
-        error_msg = "ERROR: core-image-minimal-1.0-r0 do_rootfs: Package bash cannot be installed into the image because it has incompatible license(s): GPL-3.0-or-later"
+        error_msg = "ERROR: core-image-minimal-1.0-r0 do_rootfs: Some packages cannot be installed into the image because they have incompatible licenses:\n\tbash (GPL-3.0-or-later)"
 
         result = bitbake('core-image-minimal', ignore_status=True)
         if error_msg not in result.output:
@@ -116,7 +117,7 @@ MACHINE_ESSENTIAL_EXTRA_RDEPENDS:remove = "tar"
     def test_bash_and_license(self):
         self.disable_class("create-spdx")
         self.write_config(self.default_config() + '\nLICENSE:append:pn-bash = " & SomeLicense"\nERROR_QA:remove:pn-bash = "license-exists"')
-        error_msg = "ERROR: core-image-minimal-1.0-r0 do_rootfs: Package bash cannot be installed into the image because it has incompatible license(s): GPL-3.0-or-later"
+        error_msg = "ERROR: core-image-minimal-1.0-r0 do_rootfs: Some packages cannot be installed into the image because they have incompatible licenses:\n\tbash (GPL-3.0-or-later)"
 
         result = bitbake('core-image-minimal', ignore_status=True)
         if error_msg not in result.output:
@@ -142,6 +143,7 @@ require conf/distro/include/no-gplv3.inc
 """)
         bitbake('core-image-minimal')
 
+    @skipIfNotFeature('wayland', 'Test requires wayland to be in DISTRO_FEATURES')
     def test_core_image_full_cmdline_weston(self):
         self.write_config("""
 IMAGE_CLASSES += "testimage"

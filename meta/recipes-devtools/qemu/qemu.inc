@@ -33,6 +33,7 @@ SRC_URI = "https://download.qemu.org/${BPN}-${PV}.tar.xz \
            file://0010-configure-lookup-meson-exutable-from-PATH.patch \
            file://0011-qemu-Ensure-pip-and-the-python-venv-aren-t-used-for-.patch \
            file://0001-linux-user-elfload.c-Correction-to-HWCAP2-accessor.patch \
+           file://0001-accel-tcg-Fix-iotlb_to_section-for-different-Address.patch \
            file://qemu-guest-agent.init \
            file://qemu-guest-agent.udev \
            "
@@ -129,7 +130,7 @@ do_configure:prepend:class-native() {
 	# Append build host pkg-config paths for native target since the host may provide sdl
 	BHOST_PKGCONFIG_PATH=$(PATH=/usr/bin:/bin pkg-config --variable pc_path pkg-config || echo "")
 	if [ ! -z "$BHOST_PKGCONFIG_PATH" ]; then
-		export PKG_CONFIG_PATH=$PKG_CONFIG_PATH:$BHOST_PKGCONFIG_PATH
+		export PKG_CONFIG_LIBDIR=$PKG_CONFIG_LIBDIR:$BHOST_PKGCONFIG_PATH
 	fi
 }
 

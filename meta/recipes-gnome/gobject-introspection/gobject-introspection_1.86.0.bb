@@ -23,8 +23,7 @@ GTKDOC_MESON_OPTION = "gtk_doc"
 
 MULTILIB_SCRIPTS = "${PN}-tools:${bindir}/g-ir-annotation-tool ${PN}-tools:${bindir}/g-ir-scanner"
 
-# setuptools are required to provide distutils to build the tools
-DEPENDS += " libffi zlib python3 python3-setuptools flex-native bison-native"
+DEPENDS += " libffi zlib flex-native bison-native"
 DEPENDS:append:class-native = " glib-2.0"
 DEPENDS:append:class-target = " glib-2.0-initial"
 
@@ -114,6 +113,8 @@ EOF
 do_compile:prepend() {
         # Needed to run g-ir unit tests, which won't be able to find the built libraries otherwise
         export GIR_EXTRA_LIBS_PATH=$B/.libs
+        # This prevents g-ir-scanner from writing cache data to $HOME
+        export GI_SCANNER_DISABLE_CACHE=1
 }
 
 do_install:prepend() {
@@ -194,7 +195,6 @@ FILES:${PN}-dev:append = " ${datadir}/gobject-introspection-1.0/gdump.c \
 FILES:${PN}-dev:append = " ${datadir}/gobject-introspection-1.0/tests/*.c \
                            ${datadir}/gobject-introspection-1.0/tests/*.h"
 
-FILES:${PN}-dbg += "${libdir}/gobject-introspection/giscanner/.debug/"
 FILES:${PN}-staticdev += "${libdir}/gobject-introspection/giscanner/*.a"
 
 # glib-2.0 is required for libgirepository

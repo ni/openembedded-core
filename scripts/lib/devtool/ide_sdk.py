@@ -24,6 +24,7 @@ import bb
 from devtool import exec_build_env_command, setup_tinfoil, check_workspace_recipe, DevtoolError, parse_recipe
 from devtool.standard import get_real_srctree
 from devtool.ide_plugins import BuildTool
+from oe.kernel_module import kernel_module_os_env
 
 
 logger = logging.getLogger('devtool')
@@ -415,7 +416,7 @@ class RecipeModified:
         self.staging_incdir = None
         self.strip_cmd = None
         self.target_arch = None
-        self.tcoverride = None
+        self.toolchain = None
         self.topdir = None
         self.workdir = None
         # Service management
@@ -427,6 +428,11 @@ class RecipeModified:
         self.__oe_init_dir = None
         # main build tool used by this recipe
         self.build_tool = BuildTool.UNDEFINED
+        # Whether this recipe benefits from gdbserver and rootfs-dbg in the image.
+        self.wants_gdbserver = True
+        # Whether to warn when DEBUG_BUILD is not set.  Kernel modules are built
+        # by the kernel's build system and DEBUG_BUILD does not influence them.
+        self.wants_debug_build = True
         # build_tool = cmake
         self.oecmake_generator = None
         self.cmake_cache_vars = None
@@ -436,6 +442,11 @@ class RecipeModified:
         self.mesonopts = None
         self.extra_oemeson = None
         self.meson_cross_file = None
+        # kernel module
+        self.make_targets = None
+        self.extra_oemake = None
+        self.kernel_cc = None
+        self.staging_kernel_dir = None
 
         # Populated after bitbake built all the recipes
         self._installed_binaries = None
@@ -491,7 +502,7 @@ class RecipeModified:
             recipe_d.getVar('STAGING_INCDIR'))
         self.strip_cmd = recipe_d.getVar('STRIP')
         self.target_arch = recipe_d.getVar('TARGET_ARCH')
-        self.tcoverride = recipe_d.getVar('TCOVERRIDE')
+        self.toolchain = recipe_d.getVar('TOOLCHAIN')
         self.topdir = recipe_d.getVar('TOPDIR')
         self.workdir = os.path.realpath(recipe_d.getVar('WORKDIR'))
 
@@ -509,9 +520,32 @@ class RecipeModified:
             self.extra_oemeson = recipe_d.getVar('EXTRA_OEMESON')
             self.meson_cross_file = recipe_d.getVar('MESON_CROSS_FILE')
             self.build_tool = BuildTool.MESON
+        elif bb.data.inherits_class('module', recipe_d):
+            self.build_tool = BuildTool.KERNEL_MODULE
+            self.wants_gdbserver = False
+            self.wants_debug_build = False
+            make_targets = recipe_d.getVar('MAKE_TARGETS')
+            if make_targets:
+                self.make_targets = shlex.split(make_targets)
+            else:
+                self.make_targets = ["all"]
+            extra_oemake = recipe_d.getVar('EXTRA_OEMAKE')
+            if extra_oemake:
+                self.extra_oemake = shlex.split(extra_oemake)
+            else:
+                self.extra_oemake = []
+            self.kernel_cc = recipe_d.getVar('KERNEL_CC')
+            self.staging_kernel_dir = recipe_d.getVar('STAGING_KERNEL_DIR')
+            # Export up the environment for building kernel modules
+            kernel_module_os_env(recipe_d, self.exported_vars)
 
-        self.reverse_debug_prefix_map = self._init_reverse_debug_prefix_map(
-            recipe_d.getVar('DEBUG_PREFIX_MAP'))
+        # For the kernel the KERNEL_CC variable contains the prefix-map arguments
+        if self.build_tool is BuildTool.KERNEL_MODULE:
+            self.reverse_debug_prefix_map = self._init_reverse_debug_prefix_map(
+                self.kernel_cc)
+        else:
+            self.reverse_debug_prefix_map = self._init_reverse_debug_prefix_map(
+                recipe_d.getVar('DEBUG_PREFIX_MAP'))
 
         # Recipe ID is the identifier for IDE config sections
         self.recipe_id = self.bpn + "-" + self.package_arch
@@ -639,7 +673,7 @@ class RecipeModified:
     @property
     def gdb_pretty_print_scripts(self):
         if self._gdb_pretty_print_scripts is None:
-            if self.tcoverride == "toolchain-gcc":
+            if self.toolchain == "gcc":
                 gcc_python_helpers_pattern = os.path.join(self.recipe_sysroot, "usr", "share", "gcc-*", "python")
                 gcc_python_helpers_dirs = glob.glob(gcc_python_helpers_pattern)
                 if gcc_python_helpers_dirs:
@@ -1156,12 +1190,14 @@ def ide_setup(args, config, basepath, workspace):
             exec_build_env_command(
                 config.init_path, basepath, bb_cmd_late, watch=True)
 
+    wants_gdbserver = any(
+        r.wants_gdbserver for r in recipes_modified)
     for recipe_image in recipes_images:
-        if (recipe_image.gdbserver_missing):
+        if wants_gdbserver and recipe_image.gdbserver_missing:
             logger.warning(
                 "gdbserver not installed in image %s. Remote debugging will not be available" % recipe_image)
 
-        if recipe_image.combine_dbg_image is False:
+        if wants_gdbserver and recipe_image.combine_dbg_image is False:
             logger.warning(
                 'IMAGE_CLASSES += "image-combined-dbg" is missing for image %s. Remote debugging will not find debug symbols from rootfs-dbg.' % recipe_image)
 
@@ -1178,7 +1214,7 @@ def ide_setup(args, config, basepath, workspace):
             ide.setup_modified_recipe(
                 args, recipe_image, recipe_modified)
 
-            if recipe_modified.debug_build != '1':
+            if recipe_modified.wants_debug_build and recipe_modified.debug_build != '1':
                 logger.warn(
                     'Recipe %s is compiled with release build configuration. '
                     'You might want to add DEBUG_BUILD = "1" to %s. '
