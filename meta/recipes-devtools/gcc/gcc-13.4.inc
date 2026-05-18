@@ -66,6 +66,9 @@ SRC_URI = "${BASEURI} \
            file://0024-Avoid-hardcoded-build-paths-into-ppc-libgcc.patch \
            file://0025-gcc-testsuite-tweaks-for-mips-OE.patch \
            file://0027-Fix-gcc-vect-module-testcases.patch \
+           file://0028-libcody-Make-it-buildable-by-C-11-to-C-26.patch \
+           file://0029-build-Remove-INCLUDE_MEMORY-PR117737.patch \
+           file://0030-build-Move-sstream-include-above-safe-ctype.h-PR1177.patch \
 "
 SRC_URI[sha256sum] = "9c4ce6dbb040568fdc545588ac03c5cbc95a8dbf0c7aa490170843afb59ca8f5"
 

@@ -8,7 +8,10 @@ HOMEPAGE = "https://gnome.pages.gitlab.gnome.org/gi-docgen/"
 LICENSE = "GPL-3.0-or-later & Apache-2.0"
 LIC_FILES_CHKSUM = "file://gi-docgen.py;beginline=1;endline=5;md5=2dc0f1f01202478cfe813c0e7f80b326"
 
-SRC_URI = "git://gitlab.gnome.org/GNOME/gi-docgen.git;protocol=https;branch=main"
+SRC_URI = "\
+          git://gitlab.gnome.org/GNOME/gi-docgen.git;protocol=https;branch=main \
+          file://CVE-2025-11687.patch \
+          "
 
 SRCREV = "96f2e9b93e1d8a5338eb05b87fd879856ab7b3cc"
 

@@ -1,0 +1,27 @@
+From 5e06e9846c44cb5d7b1c937728ba701b4a9d9523 Mon Sep 17 00:00:00 2001
+From: Gavin Smith <gavinsmith0123@gmail.com>
+Date: Sun, 28 Jan 2024 15:45:25 +0000
+Subject: * info/info.h (Function, CFunction): Remove unused typedefs.
+
+Upstream-Status: Backport [https://cgit.git.savannah.gnu.org/cgit/texinfo.git/commit/?id=5e06e9846c44cb5d7b1c937728ba701b4a9d9523]
+Signed-off-by: Yoann Congal <yoann.congal@smile.fr>
+---
+ info/info.h | 4 +---
+ 1 file changed, 1 insertion(+), 3 deletions(-)
+
+diff --git a/info/info.h b/info/info.h
+index 8082725146..b1274ef7a4 100644
+--- a/info/info.h
++++ b/info/info.h
+@@ -23,10 +23,8 @@
+ /* System dependencies.  */
+ #include "system.h"
+ 
+-/* Some of our other include files use these.  */
+-typedef int Function ();
++/* Some of our other include files use this.  */
+ typedef void VFunction ();
+-typedef char *CFunction ();
+ 
+ #include "string.h"
+ #include "mbiter.h"

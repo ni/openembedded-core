@@ -1,0 +1,49 @@
+From e84f0689cf7a8a77478a0e70aa62560f66c3bceb Mon Sep 17 00:00:00 2001
+From: Jan Stancek <jstancek@redhat.com>
+Date: Tue, 5 Aug 2025 11:27:23 +0200
+Subject: [PATCH] syscalls/epoll_ctl04: add ELOOP to expected errnos
+
+Kernel commit f2e467a48287 ("eventpoll: Fix semi-unbounded recursion")
+added an extra checks for determining the maximum depth of an upwards walk,
+which starting with 6.17-rc kernels now hits ELOOP before EINVAL.
+
+Add ELOOP to list of expected errnos.
+
+Upstream-Status: Backport from
+[https://github.com/linux-test-project/ltp/commit/e84f0689]
+
+Link: https://lore.kernel.org/ltp/39ee7abdee12e22074b40d46775d69d37725b932.1754386027.git.jstancek@redhat.com/
+Reviewed-by: Andrea Cervesato <andrea.cervesato@suse.com>
+Reviewed-by: Petr Vorel <pvorel@suse.cz>
+Reviewed-by: Avinesh Kumar <akumar@suse.de>
+Tested-by: Avinesh Kumar <akumar@suse.de>
+Signed-off-by: Jan Stancek <jstancek@redhat.com>
+[ modify TST_EXP_FAIL2_ARR function parameters ]
+Signed-off-by: Li Wang <li.wang@windriver.com>
+---
+ testcases/kernel/syscalls/epoll_ctl/epoll_ctl04.c | 7 +++++--
+ 1 file changed, 5 insertions(+), 2 deletions(-)
+
+diff --git a/testcases/kernel/syscalls/epoll_ctl/epoll_ctl04.c b/testcases/kernel/syscalls/epoll_ctl/epoll_ctl04.c
+index 955959b6b26..feb49623b15 100644
+--- a/testcases/kernel/syscalls/epoll_ctl/epoll_ctl04.c
++++ b/testcases/kernel/syscalls/epoll_ctl/epoll_ctl04.c
+@@ -51,13 +51,16 @@ static void cleanup(void)
+ 
+ static void verify_epoll_ctl(void)
+ {
++	const int exp_errnos[] = {EINVAL, ELOOP};
++
+ 	new_epfd = epoll_create(1);
+ 	if (new_epfd == -1)
+ 		tst_brk(TBROK | TERRNO, "fail to create epoll instance");
+ 
+ 	events.data.fd = epfd;
+-	TST_EXP_FAIL(epoll_ctl(new_epfd, EPOLL_CTL_ADD, epfd, &events), EINVAL,
+-		     "epoll_ctl(..., EPOLL_CTL_ADD, ...) with number of nesting is 5");
++	TST_EXP_FAIL2_ARR(epoll_ctl(new_epfd, EPOLL_CTL_ADD, epfd, &events),
++		exp_errnos,
++		"epoll_ctl(..., EPOLL_CTL_ADD, ...) with number of nesting is 5");
+ 	SAFE_CLOSE(new_epfd);
+ }
+ 

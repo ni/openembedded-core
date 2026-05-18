@@ -18,7 +18,8 @@ inherit ptest
 
 SRC_URI += " \
        file://run-ptest \
-           "
+       file://CVE-2026-23490.patch \
+"
 
 RDEPENDS:${PN}-ptest += " \
 	python3-pytest \

@@ -1,0 +1,27 @@
+From 3d202924c8ddd96029129bb745772cb2918a5f10 Mon Sep 17 00:00:00 2001
+From: Patrice Dumas <pertusus@free.fr>
+Date: Sun, 16 Jun 2024 15:10:22 +0200
+Subject: * system.h: remove strerror definition, the prototype looks wrong and
+ the conditional is not set anywhere.
+
+Upstream-Status: Backport [https://cgit.git.savannah.gnu.org/cgit/texinfo.git/commit/?id=3d202924c8ddd96029129bb745772cb2918a5f10]
+Signed-off-by: Yoann Congal <yoann.congal@smile.fr>
+---
+ system.h | 4 ----
+ 1 file changed, 4 deletions(-)
+
+diff --git a/system.h b/system.h
+index e32937f16e..7694d85a45 100644
+--- a/system.h
++++ b/system.h
+@@ -65,10 +65,6 @@ extern int errno;
+ #include <perror.h>
+ #endif
+ 
+-#ifndef HAVE_DECL_STRERROR
+-extern char *strerror ();
+-#endif
+-
+ #include <limits.h>
+ 
+ #ifndef PATH_MAX

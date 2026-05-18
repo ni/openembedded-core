@@ -11,7 +11,9 @@ SRC_URI:append:class-nativesdk = " \
     file://cmake-setup.py \
     file://environment.d-cmake.sh \
 "
-SRC_URI += "file://CVE-2025-9301.patch"
+SRC_URI += "file://CVE-2025-9301.patch \
+    file://0001-bootstrap-Fix-compilation-with-gcc-16-devirtualizati.patch \
+"
 
 LICENSE:append = " & BSD-1-Clause & MIT"
 LIC_FILES_CHKSUM:append = " \

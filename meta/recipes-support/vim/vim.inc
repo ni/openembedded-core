@@ -16,6 +16,12 @@ SRC_URI = "git://github.com/vim/vim.git;branch=master;protocol=https \
            file://disable_acl_header_check.patch \
            file://0001-src-Makefile-improve-reproducibility.patch \
            file://no-path-adjust.patch \
+           file://CVE-2026-25749.patch \
+           file://CVE-2026-26269.patch \
+           file://CVE-2026-33412.patch \
+           file://CVE-2026-28418.patch \
+           file://CVE-2026-28419.patch \
+           file://CVE-2026-39881.patch \
            "
 
 PV .= ".1683"

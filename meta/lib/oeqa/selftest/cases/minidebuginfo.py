@@ -6,7 +6,7 @@
 import os
 import subprocess
 import tempfile
-import shutil
+import tarfile
 
 from oeqa.selftest.case import OESelftestTestCase
 from oeqa.utils.commands import bitbake, get_bb_var, get_bb_vars, runCmd
@@ -32,7 +32,10 @@ IMAGE_FSTYPES = "tar.bz2"
         # ".gnu_debugdata" which stores minidebuginfo.
         with tempfile.TemporaryDirectory(prefix = "unpackfs-") as unpackedfs:
             filename = os.path.join(bb_vars['DEPLOY_DIR_IMAGE'], "{}.tar.bz2".format(bb_vars['IMAGE_LINK_NAME']))
-            shutil.unpack_archive(filename, unpackedfs)
+            with tarfile.open(filename) as tar:
+                tar.extract("./bin/busybox", path=unpackedfs)
+                tar.extract("./bin/busybox.nosuid", path=unpackedfs)
+                tar.extract("./lib/libc.so.6", path=unpackedfs)
 
             r = runCmd([bb_vars['READELF'], "-W", "-S", os.path.join(unpackedfs, "bin", "busybox")],
                     native_sysroot = native_sysroot, target_sys = target_sys)

@@ -33,6 +33,10 @@ SRC_URI = "${GNU_MIRROR}/texinfo/${BP}.tar.gz \
            file://link-zip.patch \
            file://dont-depend-on-help2man.patch \
            ${TARGET_PATCH} \
+           file://0001-system.h-remove-strerror-definition-the-prototype-lo.patch \
+           file://0002-info-info.h-Function-CFunction-Remove-unused-typedef.patch \
+           file://0003-Use-explicit-prototype-for-Info-command-functions.patch \
+           file://0004-Remove-VFunction.patch \
            "
 
 SRC_URI[sha256sum] = "3cc5706fb086b895e1dc2b407aade9f95a3a233ff856273e2b659b089f117683"

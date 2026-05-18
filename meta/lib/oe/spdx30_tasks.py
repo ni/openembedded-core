@@ -535,7 +535,7 @@ def create_spdx(d):
             # specified.
             if (
                 include_vex != "all"
-                and "detail" in ("fixed-version", "cpe-stable-backport")
+                and detail in ("fixed-version", "cpe-stable-backport")
             ):
                 bb.debug(1, "Skipping %s since it is already fixed upstream" % cve_id)
                 continue

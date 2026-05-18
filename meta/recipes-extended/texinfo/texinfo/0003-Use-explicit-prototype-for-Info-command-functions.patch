@@ -1,0 +1,194 @@
+From deb7fb40bcaeaa537b14e0690f0fa78081844481 Mon Sep 17 00:00:00 2001
+From: Patrice Dumas <pertusus@free.fr>
+Date: Mon, 17 Jun 2024 19:26:32 +0200
+Subject: [PATCH] Use explicit prototype for Info command functions
+
+* info/m-x.c (info_execute_command): call command function with two
+arguments only, window and count.
+
+* info/doc.h (InfoCommand), info/echo-area.c
+(read_and_dispatch_in_echo_area, ea_yank_pop)
+(ea_possible_completions), info/info.h (COMMAND_FUNCTION),
+info/makedoc.c (process_one_file), info/session.c
+(info_read_and_dispatch, read_key_sequence), info/terminal.h
+(VFunction): add a function type COMMAND_FUNCTION for pointers on info
+commands function and replace the VFunction untyped generic function
+type.  Move VFunction definition to terminal.h.
+
+Upstream-Status: Backport [https://cgit.git.savannah.gnu.org/cgit/texinfo.git/commit/?id=2e62ec97bad667f1dd91f1a396f5c0376aef1c03]
+Signed-off-by: Yoann Congal <yoann.congal@smile.fr>
+---
+ info/doc.h       |  2 +-
+ info/echo-area.c | 10 +++++-----
+ info/info.h      |  4 ++--
+ info/m-x.c       |  2 +-
+ info/makedoc.c   |  2 +-
+ info/session.c   |  8 ++++----
+ info/session.h   |  4 ++--
+ info/terminal.h  |  2 +-
+ 8 files changed, 17 insertions(+), 17 deletions(-)
+
+diff --git a/info/doc.h b/info/doc.h
+index 26ed41f80c..e9cc2ced0e 100644
+--- a/info/doc.h
++++ b/info/doc.h
+@@ -44,7 +44,7 @@ typedef struct function_keyseq
+ /* Structure describing an Info command. */
+ typedef struct
+ {
+-  VFunction *func;        /* Pointer to function implementing command. */
++  COMMAND_FUNCTION *func; /* Pointer to function implementing command. */
+   char *func_name;        /* Name of this command. */
+   FUNCTION_KEYSEQ *keys;  /* Key sequences that could invoke this command. */
+   char *doc;              /* Documentation string. */
+diff --git a/info/echo-area.c b/info/echo-area.c
+index f485e43f76..375c66a560 100644
+--- a/info/echo-area.c
++++ b/info/echo-area.c
+@@ -31,7 +31,7 @@ int info_aborted_echo_area = 0;
+ int echo_area_is_active = 0;
+ 
+ /* The address of the last command executed in the echo area. */
+-static VFunction *ea_last_executed_command = NULL;
++static COMMAND_FUNCTION *ea_last_executed_command = NULL;
+ 
+ /* Non-zero means that the last command executed while reading input
+    killed some text. */
+@@ -158,7 +158,7 @@ read_and_dispatch_in_echo_area (void)
+   while (1)
+     {
+       int count;
+-      VFunction *cmd;
++      COMMAND_FUNCTION *cmd;
+       int lk = 0;
+ 
+       lk = echo_area_last_command_was_kill;
+@@ -669,8 +669,8 @@ DECLARE_INFO_COMMAND (ea_yank_pop, _("Yank back a previous kill"))
+ {
+   register int len;
+ 
+-  if (((ea_last_executed_command != (VFunction *) ea_yank) &&
+-       (ea_last_executed_command != (VFunction *) ea_yank_pop)) ||
++  if (((ea_last_executed_command != ea_yank) &&
++       (ea_last_executed_command != ea_yank_pop)) ||
+       (kill_ring_index == 0))
+     return;
+ 
+@@ -1166,7 +1166,7 @@ DECLARE_INFO_COMMAND (ea_possible_completions, _("List possible completions"))
+ 
+ DECLARE_INFO_COMMAND (ea_complete, _("Insert completion"))
+ {
+-  if (ea_last_executed_command == (VFunction *) ea_complete)
++  if (ea_last_executed_command == ea_complete)
+     {
+       ea_possible_completions (window, count);
+       return;
+diff --git a/info/info.h b/info/info.h
+index b1274ef7a4..401b0543d3 100644
+--- a/info/info.h
++++ b/info/info.h
+@@ -23,8 +23,8 @@
+ /* System dependencies.  */
+ #include "system.h"
+ 
+-/* Some of our other include files use this.  */
+-typedef void VFunction ();
++struct window_struct;
++typedef void COMMAND_FUNCTION (struct window_struct *window, int count);
+ 
+ #include "string.h"
+ #include "mbiter.h"
+diff --git a/info/m-x.c b/info/m-x.c
+index 669d999738..9a194a1e28 100644
+--- a/info/m-x.c
++++ b/info/m-x.c
+@@ -137,7 +137,7 @@ DECLARE_INFO_COMMAND (info_execute_command,
+     free (line);
+ 
+     if (command && command->func)
+-      (*command->func) (active_window, count, 0);
++      (*command->func) (active_window, count);
+   }
+ }
+ 
+diff --git a/info/makedoc.c b/info/makedoc.c
+index e7d98d64f9..84ea419d4d 100644
+--- a/info/makedoc.c
++++ b/info/makedoc.c
+@@ -436,7 +436,7 @@ process_one_file (char *filename, FILE *doc_stream, FILE *funs_stream)
+       doc[offset - point] = '\0';
+ 
+       fprintf (doc_stream,
+-          "   { (VFunction *)%s, \"%s\", (FUNCTION_KEYSEQ *)0, %s },\n",
++          "   { %s, \"%s\", (FUNCTION_KEYSEQ *)0, %s },\n",
+           func, func_name, doc);
+ 
+       free (func_name);
+diff --git a/info/session.c b/info/session.c
+index 499857ef13..2cb4414326 100644
+--- a/info/session.c
++++ b/info/session.c
+@@ -229,7 +229,7 @@ static int info_keyseq_displayed_p;
+ void
+ info_read_and_dispatch (void)
+ {
+-  VFunction *cmd;
++  COMMAND_FUNCTION *cmd;
+   int count;
+ 
+   for (quit_info_immediately = 0; !quit_info_immediately; )
+@@ -5018,7 +5018,7 @@ incremental_search (WINDOW *window, int count)
+ 
+   while (isearch_is_active)
+     {
+-      VFunction *func = NULL;
++      COMMAND_FUNCTION *func = NULL;
+       int quoted = 0;
+ 
+       /* Show the search string in the echo area. */
+@@ -5546,7 +5546,7 @@ void info_add_digit_to_numeric_arg (WINDOW *, int count);
+ 
+    If INSERT, call ea_insert if a printable character was input.
+  */
+-VFunction *
++COMMAND_FUNCTION *
+ read_key_sequence (Keymap map, int menu, int mouse,
+                    int insert, int *count)
+ {
+@@ -5554,7 +5554,7 @@ read_key_sequence (Keymap map, int menu, int mouse,
+   int reading_universal_argument = 0;
+ 
+   int numeric_arg = 1, numeric_arg_sign = 1, *which_explicit_arg;
+-  VFunction *func;
++  COMMAND_FUNCTION *func;
+ 
+   /* Process the right numeric argument. */
+   if (!echo_area_is_active)
+diff --git a/info/session.h b/info/session.h
+index 4606d0a519..94b4935ef0 100644
+--- a/info/session.h
++++ b/info/session.h
+@@ -58,8 +58,8 @@ extern int scroll_last_node;
+ int get_input_key (void);
+ int get_another_input_key (void);
+ 
+-VFunction *read_key_sequence (Keymap map, int menu, int mouse,
+-                              int insert, int *count);
++COMMAND_FUNCTION *read_key_sequence (Keymap map, int menu, int mouse,
++                                     int insert, int *count);
+ unsigned char info_input_pending_p (void);
+ void info_set_node_of_window (WINDOW *window, NODE *node);
+ void info_set_node_of_window_fast (WINDOW *window, NODE *node);
+diff --git a/info/terminal.h b/info/terminal.h
+index 8108b6b6b5..ee881a8bb1 100644
+--- a/info/terminal.h
++++ b/info/terminal.h
+@@ -20,7 +20,7 @@
+ #if !defined (TERMINAL_H)
+ #define TERMINAL_H
+ 
+-#include "info.h"
++typedef void VFunction ();
+ 
+ /* For almost every function externally visible from terminal.c, there is
+    a corresponding "hook" function which can be bound in order to replace
