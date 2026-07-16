@@ -34,6 +34,16 @@ SRC_URI = "http://www.python.org/ftp/python/${PV}/Python-${PV}.tar.xz \
 	   file://0001-test_deadlock-skip-problematic-test.patch \
 	   file://0001-test_active_children-skip-problematic-test.patch \
            file://0001-test_readline-skip-limited-history-test.patch \
+           file://CVE-2026-1502.patch \
+           file://CVE-2026-6100.patch \
+           file://CVE-2026-3644_CVE-2026-0672.patch \
+           file://CVE-2026-4519_p1.patch \
+           file://CVE-2026-4519_p2.patch \
+           file://CVE-2026-4519_CVE-2026-4786.patch \
+           file://CVE-2026-6019_p1.patch \
+           file://CVE-2026-6019_p2.patch \
+           file://CVE-2025-13462.patch \
+           file://CVE-2026-4224.patch \
            "
 
 SRC_URI:append:class-native = " \
@@ -54,6 +64,7 @@ CVE_STATUS[CVE-2022-26488] = "not-applicable-platform: Issue only applies on Win
 # The module will be removed in the future and flaws documented.
 CVE_STATUS[CVE-2015-20107] = "upstream-wontfix: The mailcap module is insecure by design, so this can't be fixed in a meaningful way"
 CVE_STATUS[CVE-2023-36632] = "disputed: Not an issue, in fact expected behaviour"
+CVE_STATUS[CVE-2026-3087] = "not-applicable-platform: Issue only applies on Windows"
 
 PYTHON_MAJMIN = "3.12"
 

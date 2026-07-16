@@ -12,12 +12,16 @@ LICENSE = "GPL-3.0-only"
 LIC_FILES_CHKSUM = "file://COPYING;md5=d32239bcb673463ab874e80d47fae504"
 
 PACKAGECONFIG ??= "readline"
+# Make native builds lean
+PACKAGECONFIG:class-native = ""
+
 PACKAGECONFIG[readline] = "--with-readline,--without-readline,readline"
 PACKAGECONFIG[mpfr] = "--with-mpfr,--without-mpfr, mpfr"
 
 SRC_URI = "${GNU_MIRROR}/gawk/gawk-${PV}.tar.gz \
            file://0001-m4-readline-add-missing-includes.patch \
            file://run-ptest \
+           file://0001-Fix-some-C23-compilatio-issues.patch \
            "
 
 SRC_URI[sha256sum] = "378f8864ec21cfceaa048f7e1869ac9b4597b449087caf1eb55e440d30273336"
@@ -34,11 +38,19 @@ ALTERNATIVE:${PN} = "awk"
 ALTERNATIVE_TARGET[awk] = "${bindir}/gawk"
 ALTERNATIVE_PRIORITY = "100"
 
-do_install:append() {
+target_tweaks() {
 	# remove the link since we don't package it
 	rm ${D}${bindir}/awk
 	# Strip non-reproducible build flags (containing build paths)
 	sed -i -e 's|^CC.*|CC=""|g' -e 's|^CFLAGS.*|CFLAGS=""|g' ${D}${bindir}/gawkbug
+}
+
+do_install:append:class-target() {
+	target_tweaks
+}
+
+do_install:append:class-nativesdk() {
+	target_tweaks
 }
 
 inherit ptest
@@ -87,4 +99,5 @@ RDEPENDS:${PN}-ptest += "make locale-base-en-us coreutils"
 RDEPENDS:${PN}-ptest:append:libc-glibc = " locale-base-en-us.iso-8859-1"
 RDEPENDS:${PN}-ptest:append:libc-musl = " musl-locales"
 
+PROVIDES:append:class-native = " gawk-replacement-native"
 BBCLASSEXTEND = "native nativesdk"
