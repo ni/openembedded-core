@@ -19,6 +19,8 @@ inherit ptest
 SRC_URI += " \
        file://run-ptest \
        file://CVE-2026-23490.patch \
+       file://CVE-2026-59886.patch \
+       file://CVE-2026-59884.patch \
 "
 
 RDEPENDS:${PN}-ptest += " \

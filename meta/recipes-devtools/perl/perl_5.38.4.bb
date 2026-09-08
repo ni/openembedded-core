@@ -20,6 +20,10 @@ SRC_URI = "https://www.cpan.org/src/5.0/perl-${PV}.tar.gz;name=perl \
            file://0001-Fix-intermittent-failure-of-test-t-op-sigsystem.t.patch \
            file://CVE-2026-8376-01.patch \
            file://CVE-2026-8376-02.patch \
+           file://CVE-2026-13221.patch \
+           file://CVE-2026-57432-01.patch \
+           file://CVE-2026-57432-02.patch \
+           file://CVE-2025-40909.patch \
            "
 SRC_URI:append:class-native = " \
            file://perl-configpm-switch.patch \
