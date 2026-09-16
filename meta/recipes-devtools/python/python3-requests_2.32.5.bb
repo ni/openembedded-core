@@ -23,10 +23,16 @@ RDEPENDS:${PN} += " \
     python3-netserver \
     python3-pysocks \
     python3-urllib3 \
-    python3-chardet \
     python3-idna \
     python3-compression \
 "
+
+# Requests 2.26 added charset-normalizer as an alternative to chardet, since
+# 2.28 it is the default and chardet is the option. 2.32 makes both of them
+# optional to minimise footprint, falling back to UTF-8.
+PACKAGECONFIG ?= "chardet"
+PACKAGECONFIG[chardet] = ",,,python3-chardet"
+PACKAGECONFIG[charset-normalizer] = ",,,python3-charset-normalizer"
 
 FILES:${PN}:append:class-nativesdk = " ${SDKPATHNATIVE}/environment-setup.d/python3-requests.sh"
 
