@@ -29,6 +29,22 @@ SRC_URI = "git://github.com/vim/vim.git;branch=master;protocol=https;tag=v${PV} 
            file://CVE-2026-47167.patch \
            file://CVE-2026-55892.patch \
            file://CVE-2026-57452.patch \
+           file://CVE-2026-55693.patch \
+           file://CVE-2026-55895.patch \
+           file://CVE-2026-57451.patch \
+           file://CVE-2026-57453.patch \
+           file://CVE-2026-57454.patch \
+           file://CVE-2026-57455.patch \
+           file://CVE-2026-57456.patch \
+           file://CVE-2026-59856.patch \
+           file://CVE-2026-59857.patch \
+           file://CVE-2026-59858.patch \
+           file://CVE-2026-73072.patch \
+           file://CVE-2026-73073.patch \
+           file://CVE-2026-73074.patch \
+           file://CVE-2026-73076.patch \
+           file://CVE-2026-73077.patch \
+           file://CVE-2026-73078.patch \
            "
 
 PV .= ".0340"
