@@ -73,6 +73,13 @@ python do_compile() {
     if kernel_deploysubdir:
         kernel_deploydir = os.path.join(kernel_deploydir, kernel_deploysubdir)
 
+    root_node_extra_properties = d.getVarFlags("FIT_ROOT_NODE_EXTRA_PROPERTIES") or {}
+    root_node_extra_properties.pop("doc", None)
+    root_node_extra_properties = {
+        property_name: d.getVarFlag("FIT_ROOT_NODE_EXTRA_PROPERTIES", property_name)
+        for property_name in root_node_extra_properties
+    }
+
     # Collect all the its nodes before the its file is generated and mkimage gets executed
     root_node = oe.fitimage.ItsNodeRootKernel(
         d.getVar("FIT_DESC"), d.getVar("FIT_ADDRESS_CELLS"),
@@ -83,7 +90,8 @@ python do_compile() {
         d.getVar("UBOOT_MKIMAGE_SIGN"), d.getVar("UBOOT_MKIMAGE_SIGN_ARGS"),
         d.getVar('FIT_HASH_ALG'), d.getVar('FIT_SIGN_ALG'), d.getVar('FIT_PAD_ALG'),
         d.getVar('FIT_KERNEL_SIGN_KEYNAME'),
-        oe.types.boolean(d.getVar('FIT_SIGN_INDIVIDUAL')), d.getVar('UBOOT_SIGN_IMG_KEYNAME')
+        oe.types.boolean(d.getVar('FIT_SIGN_INDIVIDUAL')), d.getVar('UBOOT_SIGN_IMG_KEYNAME'),
+        opt_props=root_node_extra_properties
     )
 
     # Prepare a kernel image section.
