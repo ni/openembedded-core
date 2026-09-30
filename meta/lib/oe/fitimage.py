@@ -160,11 +160,14 @@ class ItsNodeRootKernel(ItsNode):
                  mkimage_sign=None, mkimage_sign_args=None,
                  hash_algo=None, sign_algo=None, pad_algo=None,
                  sign_keyname_conf=None,
-                 sign_individual=False, sign_keyname_img=None):
+                 sign_individual=False, sign_keyname_img=None,
+                 opt_props=None):
         props = {
             "description": description,
             "#address-cells": f"<{address_cells}>"
         }
+        if opt_props:
+            props.update(opt_props)
         super().__init__("/", None, None, props)
         self.images = ItsNodeImages(self)
         self.configurations = ItsNodeConfigurations(self)
