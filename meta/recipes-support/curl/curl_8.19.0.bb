@@ -29,6 +29,16 @@ SRC_URI = " \
     file://CVE-2026-8932.patch \
     file://CVE-2026-11352.patch \
     file://CVE-2026-11586.patch \
+    file://CVE-2026-7009.patch \
+    file://CVE-2026-8925.patch \
+    file://CVE-2026-9080.patch \
+    file://CVE-2026-9545-01.patch \
+    file://CVE-2026-9545-02.patch \
+    file://CVE-2026-9079.patch \
+    file://CVE-2026-13608.patch \
+    file://CVE-2026-80229.patch \
+    file://CVE-2026-9546-01.patch \
+    file://CVE-2026-9546-02.patch \
 "
 
 SRC_URI:append:class-nativesdk = " \
@@ -44,6 +54,8 @@ CVE_STATUS[CVE-2026-8924] = "not-applicable-config: public suffix list support i
 CVE_STATUS[CVE-2026-10536] = "${@bb.utils.contains('PACKAGECONFIG', 'nghttp2', 'unpatched', 'not-applicable-config: applicable only with HTTP/2', d)}"
 CVE_STATUS[CVE-2026-9547] = "not-applicable-config: vulnerable libssh backend is not enabled by the recipe"
 CVE_STATUS[CVE-2026-12064] = "${@bb.utils.contains('PACKAGECONFIG', 'libssh2', 'unpatched', 'not-applicable-config: SCP/SFTP support is not enabled in PACKAGECONFIG', d)}"
+CVE_STATUS[CVE-2026-8458] = "${@bb.utils.contains('PACKAGECONFIG', 'krb5 negotiate-auth', 'unpatched', 'not-applicable-config: applicable only with GSS-API-backed Negotiate authentication', d)}"
+CVE_STATUS[CVE-2026-82209] = "not-applicable-config: public suffix list support is disabled by the recipe with --without-libpsl"
 
 inherit autotools pkgconfig binconfig multilib_header ptest
 
