@@ -65,6 +65,27 @@ class _String(_Property):
         return source
 
 
+class _Boolean(_Property):
+    """A scalar JSON boolean property for an SPDX object."""
+
+    def init(self, source):
+        if not isinstance(source, bool):
+            raise TypeError("Expected an SPDX boolean, got %r" % source)
+        return source
+
+    def set_property(self, attrs, name):
+        def get_helper(obj):
+            return obj._spdx[name]
+
+        def set_helper(obj, value):
+            obj._spdx[name] = self.init(value)
+
+        def del_helper(obj):
+            del obj._spdx[name]
+
+        attrs[name] = property(get_helper, set_helper, del_helper)
+
+
 class _Object(_Property):
     """
     A scalar SPDX object property of a SPDX object
@@ -240,6 +261,7 @@ class SPDXPackage(SPDXObject):
     description = _String()
     sourceInfo = _String()
     copyrightText = _String(default="NOASSERTION")
+    filesAnalyzed = _Boolean()
     licenseInfoFromFiles = _StringList(default=["NOASSERTION"])
     externalRefs = _ObjectList(SPDXExternalReference)
     packageVerificationCode = _Object(SPDXPackageVerificationCode)
