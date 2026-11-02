@@ -869,11 +869,7 @@ def combine_spdx(d, rootfs_name, rootfs_deploydir, rootfs_spdxid, packages, spdx
 
             pkg_spdx_path = oe.sbom.doc_find_by_hashfn(deploy_dir_spdx, package_archs, pkg_name, pkg_hashfn)
             if not pkg_spdx_path:
-                if d.getVar('BUILD_IMAGES_FROM_FEEDS') == "1":
-                    bb.warn("spdx: %s has no spdx available. Skipping." % name)
-                    continue
-                else:
-                    bb.fatal("No SPDX file found for package %s, %s" % (pkg_name, pkg_hashfn))
+                bb.fatal("No SPDX file found for package %s, %s" % (pkg_name, pkg_hashfn))
 
             pkg_doc, pkg_doc_sha1 = oe.sbom.read_doc(pkg_spdx_path)
 
