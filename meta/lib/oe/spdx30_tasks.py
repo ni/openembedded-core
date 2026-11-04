@@ -1314,6 +1314,21 @@ def collect_build_package_inputs(d, objset, build, packages, files_by_hash=None)
 
     for name in sorted(packages.keys()):
         if name not in providers:
+            external_func = d.getVar("SPDX_EXTERNAL_PACKAGE_FUNC")
+            if external_func:
+                package = bb.utils.better_eval(
+                    external_func + "(d, objset, name, info)",
+                    {
+                        "d": d,
+                        "objset": objset,
+                        "name": name,
+                        "info": packages[name],
+                    },
+                )
+                if not isinstance(package, oe.spdx30.software_Package):
+                    bb.fatal(f"{external_func} did not return an SPDX package for {name}")
+                build_deps.add(oe.sbom30.get_element_link_id(package))
+                continue
             bb.note(f"Unable to find SPDX provider for '{name}'")
             continue
 

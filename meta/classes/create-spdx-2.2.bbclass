@@ -26,15 +26,6 @@ def get_namespace(d, name):
 SPDX_PACKAGE_VERSION ??= "${PV}"
 SPDX_PACKAGE_VERSION[doc] = "The version of a package, versionInfo in recipe, package and image"
 
-SPDX_EXTERNAL_PACKAGE_FUNC ??= ""
-SPDX_EXTERNAL_PACKAGE_FUNC[doc] = "Name of a python function called as \
-    func(d, name, info, outdir) for each package installed in an image or SDK \
-    that was not built by a recipe in this build (for example a package \
-    installed from a prebuilt feed). info is the package manager's entry for \
-    the package (arch, ver, filename, ...). The function must write an SPDX \
-    document containing a package with that name below outdir and return its \
-    path. If it is unset or returns nothing, the build fails."
-
 def create_annotation(d, comment):
     from datetime import datetime, timezone
 
@@ -869,38 +860,13 @@ def combine_spdx(d, rootfs_name, rootfs_deploydir, rootfs_spdxid, packages, spdx
 
     doc.packages.append(image)
 
-    external_func = d.getVar("SPDX_EXTERNAL_PACKAGE_FUNC")
-    external_docs = {}
-
-    def add_package_ref(pkg_doc, pkg_doc_sha1, pkg_spdx_path, name):
-        for p in pkg_doc.packages:
-            if p.name == name:
-                pkg_ref = oe.spdx.SPDXExternalDocumentRef()
-                pkg_ref.externalDocumentId = "DocumentRef-%s" % pkg_doc.name
-                pkg_ref.spdxDocument = pkg_doc.documentNamespace
-                pkg_ref.checksum.algorithm = "SHA1"
-                pkg_ref.checksum.checksumValue = pkg_doc_sha1
-
-                doc.externalDocumentRefs.append(pkg_ref)
-                doc.add_relationship(image, "CONTAINS", "%s:%s" % (pkg_ref.externalDocumentId, p.SPDXID))
-                return
-        bb.fatal("Unable to find package with name '%s' in SPDX file %s" % (name, pkg_spdx_path))
-
     if packages:
         for name in sorted(packages.keys()):
             if name not in providers:
-                pkg_spdx_path = None
-                if external_func:
-                    pkg_spdx_path = bb.utils.better_eval(
-                        "%s(d, name, info, outdir)" % external_func,
-                        {"d": d, "name": name, "info": packages[name], "outdir": spdx_workdir / "external"})
-                if not pkg_spdx_path:
-                    bb.fatal("Unable to find SPDX provider for '%s'" % name)
-
-                pkg_spdx_path = Path(pkg_spdx_path)
-                pkg_doc, pkg_doc_sha1 = oe.sbom.read_doc(pkg_spdx_path)
-                external_docs[pkg_doc.documentNamespace] = pkg_spdx_path
-                add_package_ref(pkg_doc, pkg_doc_sha1, pkg_spdx_path, name)
+                if d.getVar("BUILD_IMAGES_FROM_FEEDS") == "1":
+                    bb.warn(f"Skipping SPDX combination for package {name}.")
+                    continue
+                bb.note("Unable to find SPDX provider for '%s'" % name)
                 continue
 
             pkg_name, pkg_hashfn = providers[name]
@@ -910,7 +876,20 @@ def combine_spdx(d, rootfs_name, rootfs_deploydir, rootfs_spdxid, packages, spdx
                 bb.fatal("No SPDX file found for package %s, %s" % (pkg_name, pkg_hashfn))
 
             pkg_doc, pkg_doc_sha1 = oe.sbom.read_doc(pkg_spdx_path)
-            add_package_ref(pkg_doc, pkg_doc_sha1, pkg_spdx_path, name)
+
+            for p in pkg_doc.packages:
+                if p.name == name:
+                    pkg_ref = oe.spdx.SPDXExternalDocumentRef()
+                    pkg_ref.externalDocumentId = "DocumentRef-%s" % pkg_doc.name
+                    pkg_ref.spdxDocument = pkg_doc.documentNamespace
+                    pkg_ref.checksum.algorithm = "SHA1"
+                    pkg_ref.checksum.checksumValue = pkg_doc_sha1
+
+                    doc.externalDocumentRefs.append(pkg_ref)
+                    doc.add_relationship(image, "CONTAINS", "%s:%s" % (pkg_ref.externalDocumentId, p.SPDXID))
+                    break
+            else:
+                bb.fatal("Unable to find package with name '%s' in SPDX file %s" % (name, pkg_spdx_path))
 
             runtime_spdx_path = oe.sbom.doc_find_by_hashfn(deploy_dir_spdx, package_archs, "runtime-" + name, pkg_hashfn)
             if not runtime_spdx_path:
@@ -987,8 +966,7 @@ def combine_spdx(d, rootfs_name, rootfs_deploydir, rootfs_spdxid, packages, spdx
                     })
 
                 for ref in doc.externalDocumentRefs:
-                    ref_path = external_docs.get(ref.spdxDocument) or \
-                        oe.sbom.doc_find_by_namespace(deploy_dir_spdx, package_archs, ref.spdxDocument)
+                    ref_path = oe.sbom.doc_find_by_namespace(deploy_dir_spdx, package_archs, ref.spdxDocument)
                     if not ref_path:
                         bb.fatal("Cannot find any SPDX file for document %s" % ref.spdxDocument)
                     collect_spdx_document(ref_path)
@@ -1014,4 +992,3 @@ def combine_spdx(d, rootfs_name, rootfs_deploydir, rootfs_spdxid, packages, spdx
             tar.addfile(info, fileobj=index_str)
 
 combine_spdx[vardepsexclude] += "BB_NUMBER_THREADS SPDX_MULTILIB_SSTATE_ARCHS"
-combine_spdx[vardeps] += "SPDX_EXTERNAL_PACKAGE_FUNC ${SPDX_EXTERNAL_PACKAGE_FUNC}"
