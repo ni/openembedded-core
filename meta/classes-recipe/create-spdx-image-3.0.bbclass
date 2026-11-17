@@ -9,6 +9,12 @@ SPDX_ROOTFS_PACKAGES = "${SPDXDIR}/rootfs-packages.json"
 SPDXIMAGEDEPLOYDIR = "${SPDXDIR}/image-deploy"
 SPDXROOTFSDEPLOY = "${SPDXDIR}/rootfs-deploy"
 
+SPDX_EXTERNAL_PACKAGE_FUNC ??= ""
+SPDX_EXTERNAL_PACKAGE_FUNC[doc] = "Optional Python function (d, objset, name, info) \
+that adds inventory for an installed package without a recipe SPDX provider \
+to objset and returns its software_Package."
+do_create_rootfs_spdx[vardeps] += "${SPDX_EXTERNAL_PACKAGE_FUNC}"
+
 python spdx_collect_rootfs_packages() {
     import json
     from pathlib import Path
