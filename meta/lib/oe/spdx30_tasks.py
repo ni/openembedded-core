@@ -5,6 +5,7 @@
 #
 
 import json
+import fnmatch
 import oe.cve_check
 import oe.packagedata
 import oe.patch
@@ -32,6 +33,27 @@ def set_timestamp_now(d, o, prop):
         # Doing this helps to validated that the property actually exists, and
         # also that it is not mandatory
         delattr(o, prop)
+
+
+def _spdx_skip_patterns(d):
+    return (d.getVar("SPDX_SKIP_PACKAGES") or "").split()
+
+
+def _spdx_package_is_skipped(d, package, pkg_name=None):
+    patterns = _spdx_skip_patterns(d)
+    if not patterns:
+        return False
+
+    names = [package]
+    if pkg_name:
+        names.append(pkg_name)
+
+    for pattern in patterns:
+        for name in names:
+            if fnmatch.fnmatch(name, pattern):
+                return True
+
+    return False
 
 
 def add_license_expression(
@@ -914,6 +936,10 @@ def create_spdx(d):
 
             pkg_name = d.getVar("PKG:%s" % package) or package
 
+            if _spdx_package_is_skipped(d, package, pkg_name):
+                bb.note(f"SPDX: skipping package SPDX staging for {pkg_name}")
+                continue
+
             bb.debug(1, "Creating SPDX for package %s" % pkg_name)
 
             pkg_objset = oe.sbom30.ObjectSet.new_objset(d, "package-" + pkg_name)
@@ -1155,6 +1181,10 @@ def create_package_spdx(d):
         if not oe.packagedata.packaged(package, localdata):
             continue
 
+        if _spdx_package_is_skipped(localdata, package, pkg_name):
+            bb.note(f"SPDX: skipping package SPDX finalization for {pkg_name}")
+            continue
+
         spdx_package, pkg_objset = oe.sbom30.load_obj_in_jsonld(
             d,
             pkg_arch,
@@ -1186,6 +1216,11 @@ def create_package_spdx(d):
             (dep, _) = providers[dep]
 
             if not oe.packagedata.packaged(dep, localdata):
+                continue
+
+            dep_pkg_name = d.getVar("PKG:%s" % dep) or dep
+            if _spdx_package_is_skipped(localdata, dep, dep_pkg_name):
+                bb.note(f"SPDX: skipping runtime dep link to {dep_pkg_name}")
                 continue
 
             dep_pkg_data = oe.packagedata.read_subpkgdata_dict(dep, d)
@@ -1320,13 +1355,29 @@ def collect_build_package_inputs(d, objset, build, packages, files_by_hash=None)
         pkg_name, pkg_hashfn = providers[name]
 
         # Copy all of the package SPDX files into the Sbom elements
-        pkg_spdx, pkg_objset = oe.sbom30.find_root_obj_in_jsonld(
+        pkg_objset, _ = oe.sbom30.find_jsonld(
             d,
             "packages",
             "package-" + pkg_name,
+            required=False,
+        )
+
+        if pkg_objset is None:
+            if d.getVar("SPDX_ALLOW_MISSING_PACKAGE_SPDX") == "1":
+                bb.warn(f"SPDX: missing package SPDX for {pkg_name}; skipping")
+                continue
+            bb.fatal(f"SPDX: missing required package SPDX for {pkg_name}")
+
+        pkg_spdx = pkg_objset.find_root(
             oe.spdx30.software_Package,
             software_primaryPurpose=oe.spdx30.software_SoftwarePurpose.install,
         )
+        if not pkg_spdx:
+            if d.getVar("SPDX_ALLOW_MISSING_PACKAGE_SPDX") == "1":
+                bb.warn(f"SPDX: package SPDX doc for {pkg_name} has no install package root; skipping")
+                continue
+            bb.fatal(f"SPDX: no install package root in package SPDX for {pkg_name}")
+
         build_deps.add(oe.sbom30.get_element_link_id(pkg_spdx))
 
         if files_by_hash is not None:
