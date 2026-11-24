@@ -89,6 +89,17 @@ SPDX_FILE_EXCLUDE_PATTERNS[doc] = "Space-separated list of Python regular \
     (no filtering). Example: \
     SPDX_FILE_EXCLUDE_PATTERNS = '\\.patch$ \\.diff$ /test/ \\.pyc$ \\.o$'"
 
+SPDX_SKIP_PACKAGES ??= ""
+SPDX_SKIP_PACKAGES[doc] = "Space-separated shell-style patterns of output package names \
+    to skip during SPDX package generation. Matching is against both package \
+    override name (e.g. ${PN}-dbg, kernel-module-foo) and final PKG name. \
+    Example: SPDX_SKIP_PACKAGES = 'kernel-module-* ${PN}-src'"
+
+SPDX_ALLOW_MISSING_PACKAGE_SPDX ??= "0"
+SPDX_ALLOW_MISSING_PACKAGE_SPDX[doc] = "If set to '1', image/rootfs SPDX generation \
+    warns and skips packages whose package SPDX document is missing. This is \
+    useful when SPDX_SKIP_PACKAGES intentionally omits some package SPDX files."
+
 python () {
     from oe.cve_check import extend_cve_status
     extend_cve_status(d)
