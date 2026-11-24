@@ -1329,7 +1329,7 @@ def collect_build_package_inputs(d, objset, build, packages, files_by_hash=None)
                     bb.fatal(f"{external_func} did not return an SPDX package for {name}")
                 build_deps.add(oe.sbom30.get_element_link_id(package))
                 continue
-            bb.note(f"Unable to find SPDX provider for '{name}'")
+            bb.warn(f"Unable to find SPDX provider for '{name}'")
             continue
 
         pkg_name, pkg_hashfn = providers[name]
